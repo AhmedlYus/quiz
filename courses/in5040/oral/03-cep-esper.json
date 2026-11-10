@@ -1,0 +1,242 @@
+[
+  {
+    "id": "oral-l03-q01",
+    "type": "explain",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "In Esper EPL patterns:\na) What does the every operator do?\nb) What does the followed-by operator (->) do?",
+    "hints": [
+      "What happens to a plain pattern after it has matched once - and what could make it match again?",
+      "The arrow is about order of arrival, not about logical inference.",
+      "every only binds to the sub-expression immediately following it."
+    ],
+    "keyPoints": [
+      "-> (followed-by): the right-hand side must occur after the left-hand side has matched; it expresses temporal order",
+      "every restarts the sub-expression it applies to after each of its matches, so the pattern can fire repeatedly",
+      "Without every, a pattern matches only once (the first complete match) and then stops",
+      "Placement matters: every A -> B repeats the A side; A -> every B repeats the B side",
+      "every A -> B: each A starts a fresh waiter for the next B after that A"
+    ],
+    "modelAnswer": "In Esper patterns, 'A -> B' is the followed-by operator: it matches when an A has occurred and then a B occurs after it - the arrow expresses temporal order of arrival, not logical implication. A plain 'A -> B' matches only once: after the first complete match, the whole pattern is done. 'every' is a repetition operator: it restarts the sub-expression it applies to every time that sub-expression matches, so the pattern can fire again and again. So 'every A -> B' means: every time an A arrives, start a fresh sub-expression that waits for the next B after that A; each A pairs with the first B that comes after it. Placed differently - 'A -> every B' - the meaning changes: one A, then every subsequent B. So the position of every decides which side of the pattern gets repeated, and without every there is exactly one match.",
+    "followUps": [
+      "What would the pattern without any every output on a stream with several A and B events?"
+    ],
+    "seconds": 150,
+    "source": "Lecture 3; H25 Assignment 2, Q3"
+  },
+  {
+    "id": "oral-l03-q02",
+    "type": "compare",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Compare the patterns 'every A -> B' and 'A -> every B':\na) Which matches does each pattern produce on the event stream below?\nb) Explain why the placement of every makes the difference.",
+    "code": "Events of four types arrive in this order (A1 is the first A event, B1 the first B event, and so on):\n\nA1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4",
+    "hints": [
+      "For each pattern, ask: what gets repeated - the events before or after the arrow?",
+      "For 'every A -> B', track what each individual A is waiting for; for 'A -> every B', ask how many A events ever take part.",
+      "A single B can close several open waiters at once - check which A events are still open when B1 arrives."
+    ],
+    "keyPoints": [
+      "every binds to the sub-expression immediately following it and restarts it on each of its matches",
+      "every A -> B: one new waiter per A; one B can complete several waiters (B1 matches both A1 and A2)",
+      "every A -> B matches: (A1,B1), (A2,B1), (A3,B2), (A4,B4)",
+      "A -> every B: A matches only once (the first A), then every later B matches with that same A",
+      "A -> every B matches: (A1,B1), (A1,B2), (A1,B3), (A1,B4) - A2, A3 and A4 never take part",
+      "Without any every, the pattern fires once on (A1,B1) and stops"
+    ],
+    "modelAnswer": "In 'every A -> B', every applies to A: every time an A arrives, a new sub-expression starts and waits for the next B after that A. So A1 waits for a B and gets B1; A2 also waits and also gets B1 - the same B can complete several waiters; A3 gets B2; A4 arrives after B3, so its B is B4. Matches: (A1,B1), (A2,B1), (A3,B2), (A4,B4). In 'A -> every B', every applies to B: A matches once - the first A, A1 - and after that, every B produces a new match: (A1,B1), (A1,B2), (A1,B3), (A1,B4). The A2, A3 and A4 events never start anything, because the A part already matched and is never restarted. The difference is what gets repeated: in the first pattern the A side repeats, so each A pairs with the next B; in the second the B side repeats, so one A pairs with every later B. Placing every is therefore what decides which side can produce matches again and again.",
+    "followUps": [
+      "What would 'every (A -> B)' output here, and why does A2 disappear from the results?",
+      "How many pairs would 'every A -> every B' produce on this stream?"
+    ],
+    "seconds": 210,
+    "source": "Lecture 3; H25 Assignment 2, Q3"
+  },
+  {
+    "id": "oral-l03-q03",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Write an EPL statement that outputs, for the days at JFK where the average temperature was above 85 °F, the date (timestamp) together with the average, minimum and maximum temperature.",
+    "code": "Streams: jfk and san_francisco - one WeatherTuple per day, 2014-2018, arriving in timestamp order.\n\nWeatherTuple fields:\n  timestamp: long (ms since epoch; one tuple per day)\n  weatherStation: string\n  stationName: string\n  averageTemperature: double (Fahrenheit)\n  minimumTemperature: double (Fahrenheit)\n  maximumTemperature: double (Fahrenheit)\n  averageWindSpeed: double (mph)\n  precipitation: double (inches)\n  weather: string\n\nEsper 8.2.0. Window views use the # syntax, e.g. #length(7), #length_batch(7), #time(30 sec), #ext_timed(timestamp, 7 days). Queries do not end with a semicolon.",
+    "hints": [
+      "Check whether the answer for a day depends on more than one tuple - that tells you if a window is needed at all.",
+      "A filter written directly on the stream, like jfk(averageTemperature > 85), drops the tuples you do not want before they enter the statement."
+    ],
+    "keyPoints": [
+      "No window needed: each result row depends on a single tuple",
+      "Filter directly on the stream: jfk(averageTemperature > 85)",
+      "Select the four output fields: timestamp, averageTemperature, minimumTemperature, maximumTemperature"
+    ],
+    "modelAnswer": "select timestamp, averageTemperature, minimumTemperature, maximumTemperature\nfrom jfk(averageTemperature > 85)",
+    "alternatives": [
+      "select timestamp, averageTemperature, minimumTemperature, maximumTemperature from jfk where averageTemperature > 85"
+    ],
+    "followUps": [
+      "Why is no window needed for this query?",
+      "How would the query change if you only wanted hot days where it also rained?"
+    ],
+    "seconds": 120,
+    "source": "Lecture 3; H25 mandatory Esper assignment"
+  },
+  {
+    "id": "oral-l03-q04",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Write an EPL statement that outputs the 7-day periods at JFK where the average temperature was above 82 °F, using a sliding tuple window. Output the average and the date the window ended on. Be ready to explain what changes in the tumbling version.",
+    "code": "Streams: jfk and san_francisco - one WeatherTuple per day, 2014-2018, arriving in timestamp order.\n\nWeatherTuple fields:\n  timestamp: long (ms since epoch; one tuple per day)\n  weatherStation: string\n  stationName: string\n  averageTemperature: double (Fahrenheit)\n  minimumTemperature: double (Fahrenheit)\n  maximumTemperature: double (Fahrenheit)\n  averageWindSpeed: double (mph)\n  precipitation: double (inches)\n  weather: string\n\nEsper 8.2.0. Window views use the # syntax, e.g. #length(7), #length_batch(7), #time(30 sec), #ext_timed(timestamp, 7 days). Queries do not end with a semicolon.",
+    "hints": [
+      "The average is over several days, so the tuples must be collected - which view keeps the most recent 7 tuples and updates on every arrival?",
+      "Aggregates cannot go in the where clause of a plain EPL query - use having to filter on the computed average."
+    ],
+    "keyPoints": [
+      "#length(7) keeps the last 7 tuples and is re-evaluated on every arrival (sliding window)",
+      "avg(averageTemperature) over the window contents, filtered with having, not where",
+      "max(timestamp) gives the date the window ended on (aggregates must be used for fields in select here)",
+      "Tumbling version: #length_batch(7) emits one result per completed batch of 7 days"
+    ],
+    "modelAnswer": "select max(timestamp) as windowEnd, avg(averageTemperature) as weeklyAverage\nfrom jfk#length(7)\nhaving avg(averageTemperature) > 82",
+    "alternatives": [
+      "Tumbling version: select max(timestamp) as weekEnd, avg(averageTemperature) as weeklyAverage from jfk#length_batch(7) having avg(averageTemperature) > 82"
+    ],
+    "followUps": [
+      "Once the window is full, how many result rows does the sliding query produce per arriving day?",
+      "Which of the two versions would you choose if each day must belong to exactly one reported week, and why?"
+    ],
+    "seconds": 150,
+    "source": "Lecture 3; H25 mandatory Esper assignment"
+  },
+  {
+    "id": "oral-l03-q05",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Write an EPL statement that outputs the weeks (batches of 7 tuples) at San Francisco where the total precipitation was at least 3 inches, together with the date of the last day of the week.",
+    "code": "Streams: jfk and san_francisco - one WeatherTuple per day, 2014-2018, arriving in timestamp order.\n\nWeatherTuple fields:\n  timestamp: long (ms since epoch; one tuple per day)\n  weatherStation: string\n  stationName: string\n  averageTemperature: double (Fahrenheit)\n  minimumTemperature: double (Fahrenheit)\n  maximumTemperature: double (Fahrenheit)\n  averageWindSpeed: double (mph)\n  precipitation: double (inches)\n  weather: string\n\nEsper 8.2.0. Window views use the # syntax, e.g. #length(7), #length_batch(7), #time(30 sec), #ext_timed(timestamp, 7 days). Queries do not end with a semicolon.",
+    "hints": [
+      "'Weeks' here are tumbling count windows - which view releases events in fixed batches instead of keeping the last 7?",
+      "Filtering on a computed total again needs having, not where."
+    ],
+    "keyPoints": [
+      "#length_batch(7) collects tuples and releases them as one batch per week (tumbling window)",
+      "sum(precipitation) over the batch, filtered with having >= 3",
+      "max(timestamp) gives the date of the last day in the batch",
+      "With #length_batch the statement emits exactly once per completed batch"
+    ],
+    "modelAnswer": "select max(timestamp) as weekEnd, sum(precipitation) as weeklyPrecipitation\nfrom san_francisco#length_batch(7)\nhaving sum(precipitation) >= 3",
+    "followUps": [
+      "What would change for a sliding 7-day rainfall total instead of whole weeks?",
+      "How would you count the days with precipitation > 0 inside each week?"
+    ],
+    "seconds": 150,
+    "source": "Lecture 3; H25 mandatory Esper assignment"
+  },
+  {
+    "id": "oral-l03-q06",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Write an EPL statement that finds pairs of days at JFK where the temperature differs by at least 40 °F between the two days, and the two days are at most 7 days apart. Output the dates and the two temperatures.",
+    "code": "Streams: jfk and san_francisco - one WeatherTuple per day, 2014-2018, arriving in timestamp order.\n\nWeatherTuple fields:\n  timestamp: long (ms since epoch; one tuple per day)\n  weatherStation: string\n  stationName: string\n  averageTemperature: double (Fahrenheit)\n  minimumTemperature: double (Fahrenheit)\n  maximumTemperature: double (Fahrenheit)\n  averageWindSpeed: double (mph)\n  precipitation: double (inches)\n  weather: string\n\nEsper 8.2.0. Window views use the # syntax, e.g. #length(7), #length_batch(7), #time(30 sec), #ext_timed(timestamp, 7 days). Queries do not end with a semicolon.",
+    "hints": [
+      "This is about combinations of days from a recent past - decide between a window with grouping and a pattern.",
+      "A pattern can chain two tags on the same stream with -> ; 'within 7 days' must be expressed on the timestamps as milliseconds.",
+      "every a=jfk -> b=jfk pairs each day with every later day; filter the pairs afterwards in the where clause."
+    ],
+    "keyPoints": [
+      "Pattern with followed-by: every a=jfk -> b=jfk pairs each day with every later day",
+      "every restarts the A side per day; -> gives temporal order (b arrives after a)",
+      "'Within 7 days' as a data condition on timestamps: b.timestamp - a.timestamp <= 604800000 ms (7 x 86400000)",
+      "Temperature difference in either direction: express with two comparisons combined by or (or Math.abs)",
+      "Select fields from both tagged events a and b"
+    ],
+    "modelAnswer": "select a.timestamp, b.timestamp, a.averageTemperature, b.averageTemperature\nfrom pattern [every a=jfk -> b=jfk]\nwhere b.timestamp - a.timestamp <= 604800000\n  and (a.averageTemperature - b.averageTemperature >= 40 or b.averageTemperature - a.averageTemperature >= 40)",
+    "alternatives": [
+      "With a time guard instead of the timestamp comparison (requires engine time to advance with the event timestamps): select a.timestamp, b.timestamp from pattern [every a=jfk -> (b=jfk where timer:within(7 days))] where Math.abs(a.averageTemperature - b.averageTemperature) >= 40",
+      "Using Math.abs in the main variant: replace the or-condition with Math.abs(a.averageTemperature - b.averageTemperature) >= 40"
+    ],
+    "followUps": [
+      "What does every contribute here - what would you lose without it?",
+      "How would you find three-day periods where it rained and the wind speed was over 19 mph?"
+    ],
+    "seconds": 180,
+    "source": "Lecture 3; H25 mandatory Esper assignment"
+  },
+  {
+    "id": "oral-l03-q07",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Write an EPL statement that finds three consecutive days at San Francisco where the average wind speed increased by at least 5 mph from one day to the next, and it rained (precipitation > 0) on each of the three days. Output the three dates and the three wind speeds.",
+    "code": "Streams: jfk and san_francisco - one WeatherTuple per day, 2014-2018, arriving in timestamp order.\n\nWeatherTuple fields:\n  timestamp: long (ms since epoch; one tuple per day)\n  weatherStation: string\n  stationName: string\n  averageTemperature: double (Fahrenheit)\n  minimumTemperature: double (Fahrenheit)\n  maximumTemperature: double (Fahrenheit)\n  averageWindSpeed: double (mph)\n  precipitation: double (inches)\n  weather: string\n\nEsper 8.2.0. Window views use the # syntax, e.g. #length(7), #length_batch(7), #time(30 sec), #ext_timed(timestamp, 7 days). Queries do not end with a semicolon.",
+    "hints": [
+      "'Consecutive' is a property you can check on the timestamps - one day is 86400000 ms.",
+      "A pattern can chain several tags from the same stream with -> .",
+      "Chain every a=san_francisco -> b=san_francisco -> c=san_francisco and put all the conditions on b and c in the where clause."
+    ],
+    "keyPoints": [
+      "Pattern with three tags in sequence: every a=... -> b=... -> c=... ; every restarts the first day per match attempt",
+      "Consecutive days enforced by timestamp difference of exactly one day (86400000 ms)",
+      "Increasing wind by at least 5 mph per step: b - a >= 5 and c - b >= 5 on averageWindSpeed",
+      "Rain on all three days: precipitation > 0 for a, b and c",
+      "Fields of matched events are selected via the tags a, b, c"
+    ],
+    "modelAnswer": "select a.timestamp, b.timestamp, c.timestamp, a.averageWindSpeed, b.averageWindSpeed, c.averageWindSpeed\nfrom pattern [every a=san_francisco -> b=san_francisco -> c=san_francisco]\nwhere b.timestamp - a.timestamp = 86400000\n  and c.timestamp - b.timestamp = 86400000\n  and b.averageWindSpeed - a.averageWindSpeed >= 5\n  and c.averageWindSpeed - b.averageWindSpeed >= 5\n  and a.precipitation > 0 and b.precipitation > 0 and c.precipitation > 0",
+    "followUps": [
+      "Why can requiring exactly one day between timestamps be risky if the data has gaps (missing days)?",
+      "Could a tumbling batch of 3 tuples express the same query? What would be different about its matches?"
+    ],
+    "seconds": 180,
+    "source": "Lecture 3; H25 mandatory Esper assignment"
+  },
+  {
+    "id": "oral-l03-q08",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Write an EPL statement that joins weekly (7-tuple) batches of san_francisco and jfk and outputs the weeks where the San Francisco average temperature was more than 35 °F warmer than the JFK average, and it rained at JFK but not at San Francisco.",
+    "code": "Streams: jfk and san_francisco - one WeatherTuple per day, 2014-2018, arriving in timestamp order.\n\nWeatherTuple fields:\n  timestamp: long (ms since epoch; one tuple per day)\n  weatherStation: string\n  stationName: string\n  averageTemperature: double (Fahrenheit)\n  minimumTemperature: double (Fahrenheit)\n  maximumTemperature: double (Fahrenheit)\n  averageWindSpeed: double (mph)\n  precipitation: double (inches)\n  weather: string\n\nEsper 8.2.0. Window views use the # syntax, e.g. #length(7), #length_batch(7), #time(30 sec), #ext_timed(timestamp, 7 days). Queries do not end with a semicolon.",
+    "hints": [
+      "Joining two windows needs one stream to drive the evaluation - Esper's keyword for that is unidirectional.",
+      "Conditions on computed weekly averages cannot go in where - aggregate them in select and filter in having.",
+      "Remember that a join over two windows sees the cross product of both batches, which is fine for averages."
+    ],
+    "keyPoints": [
+      "Join the two batch-windowed streams, with one stream marked unidirectional so one side drives the evaluation",
+      "Weekly statistics with aggregates: avg of averageTemperature, sum of precipitation for each stream",
+      "'35 degrees warmer' expressed as avg(sf.averageTemperature) > avg(jfk.averageTemperature) + 35",
+      "Rain condition on totals: sum of precipitation = 0 at SF, > 0 at JFK (scale-invariant over the cross product)",
+      "The aggregates go in select and having, not in where"
+    ],
+    "modelAnswer": "select avg(sf.averageTemperature) as sfAvg, avg(ny.averageTemperature) as jfkAvg, sum(sf.precipitation) as sfPrecipitation, sum(ny.precipitation) as jfkPrecipitation\nfrom san_francisco#length_batch(7) as sf unidirectional, jfk#length_batch(7) as ny\nhaving avg(sf.averageTemperature) > avg(ny.averageTemperature) + 35\n  and sum(sf.precipitation) = 0 and sum(ny.precipitation) > 0",
+    "alternatives": [
+      "Two statements: first insert into sfWeek select max(timestamp) as weekEnd, avg(averageTemperature) as avgTemp, sum(precipitation) as precip from san_francisco#length_batch(7) (and likewise for jfk), then join the two week streams and filter on their fields"
+    ],
+    "followUps": [
+      "When exactly does the join evaluate, and what does the jfk window contain at that moment?",
+      "What could go wrong if the two streams' batches get out of step, for example because days are missing at one station?"
+    ],
+    "seconds": 210,
+    "source": "Lecture 3; H25 mandatory Esper assignment"
+  },
+  {
+    "id": "oral-l03-q09",
+    "type": "walkthrough",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "The events of four types arrive in the order shown below, and the EPL statement runs on them. Which (a, b) pairs does the statement output? Explain each match and the role of every.",
+    "code": "Events of four types arrive in this order (A1 is the first A event, B1 the first B event, and so on):\n\nA1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4\n\nselect a, b\nfrom pattern [every a=A -> b=B]",
+    "hints": [
+      "For every A that arrives, ask: which is the first B event that arrives after it?",
+      "When B1 arrives, several waiters are open at the same time - which ones does it close?",
+      "For A4, check carefully which B events have already passed before it."
+    ],
+    "keyPoints": [
+      "every restarts the A part per A event: each A starts its own waiter for the next B after it",
+      "B1 arrives while the waiters from A1 and A2 are both open, so it matches both: (A1,B1) and (A2,B1)",
+      "B3 arrives before A4, so it cannot pair with A4 - the arrow requires B to come after A",
+      "A4's waiter stays open until B4: (A4,B4)",
+      "Output: (A1,B1), (A2,B1), (A3,B2), (A4,B4); without every only (A1,B1) would be output"
+    ],
+    "modelAnswer": "The statement outputs four pairs: (A1,B1), (A2,B1), (A3,B2) and (A4,B4). every restarts the A part of the pattern for every A: when A1 arrives, a sub-expression starts waiting for the next B; when A2 arrives, a second waiter starts alongside the first. B1 arrives next and completes both waiters, giving (A1,B1) and (A2,B1) - one B can serve several waiters at once. A3 then starts a new waiter, which B2 completes: (A3,B2). A4 arrives after B3 has already passed, so B3 cannot match it - the arrow requires the B to come after the A - and A4's waiter stays open until B4: (A4,B4). In short: each output pair is an A together with the first B that arrives after it, and without every the statement would output only (A1,B1) and then stop.",
+    "followUps": [
+      "What would 'A -> every B' output on this stream, and why do A2, A3 and A4 never take part?",
+      "What would 'every (A -> B)' output, and why does A2 disappear from the results?",
+      "How many pairs would 'every A -> every B' output in total?"
+    ],
+    "seconds": 180,
+    "source": "Lecture 3; H25 Assignment 2, Q3"
+  }
+]

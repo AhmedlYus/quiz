@@ -1,0 +1,81 @@
+[
+  {
+    "id": "oral-l08-q01",
+    "type": "topic",
+    "topic": "Lecture 8: Scalable & Cloud Data Management",
+    "prompt": "a) What does it mean to design scalable data management for big data?\nb) Which design decisions give scalability, and what do they cost?",
+    "hints": [
+      "Start with the scale-up vs scale-out choice, then ask how data is split over nodes.",
+      "Ask what happens to a query that touches many nodes - and to one that touches only one.",
+      "Replication solves one problem and creates another - which?"
+    ],
+    "keyPoints": [
+      "Scale-out on clusters of commodity machines (shared-nothing) instead of scale-up on one big machine",
+      "Partitioning/sharding: split data by hash or range of a key so storage and load grow together; keep queries single-partition where possible",
+      "Replication: copies give availability and read scale - but keeping replicas in sync reintroduces the consistency problem (CAP)",
+      "Move computation to the data rather than data to computation (MapReduce/Hadoop, Spark)",
+      "Elasticity and rebalancing: add nodes without redesigning the data model",
+      "Cost: giving up full transactions and joins everywhere; distributed coordination is the enemy of scale"
+    ],
+    "modelAnswer": "Designing for big data means planning for growth beyond one machine from day one. The first decision is scale-out instead of scale-up: many commodity servers in a shared-nothing cluster rather than one big box. The second is partitioning: the data is split over the nodes - by hash or range of a key - so that both storage and load grow together; queries and the data model should be designed so most requests touch a single partition, because distributed joins and cross-partition transactions are what kills scalability. The third is replication: each partition has copies on other nodes, which gives availability when machines fail and spreads read load - but the replicas must be kept in sync, and that is where the consistency trade-offs begin. The fourth is moving the computation to the data: frameworks like MapReduce and Spark ship the program to the node that holds the data instead of pulling data through the network. And finally elasticity: the design must let you add nodes and rebalance without redesign. What you give up is the comfort of full transactions and joins across all data - coordination is the enemy of scale.",
+    "followUps": [
+      "Why are distributed joins so expensive compared to single-partition access?",
+      "When would you still insist on strong consistency in such a design?"
+    ],
+    "seconds": 240,
+    "source": "Lecture 8; H25 Assignment 2, Q8"
+  },
+  {
+    "id": "oral-l08-q02",
+    "type": "explain",
+    "topic": "Lecture 8: Scalable & Cloud Data Management",
+    "prompt": "a) What are the main challenges of moving data management into the cloud?\nb) Which approaches address them?",
+    "hints": [
+      "The cloud promises elastic resources - what must data management do to use them?",
+      "Hardware fails at cloud scale: what does the design have to assume?",
+      "Think beyond technology: cost, data location and lock-in are challenges too."
+    ],
+    "keyPoints": [
+      "Elasticity: scale up for peaks and down again, paying only for what is used - provisioning must be automatic",
+      "Availability: hardware fails all the time at scale - tolerate it via replication across zones or regions",
+      "Consistency: geo-distributed replication adds latency - the CAP trade-off again, now with distance",
+      "Cost: storage is cheap but moving data out of the cloud is not - egress and query patterns matter",
+      "Security, privacy and compliance: data location may be legally constrained; multitenancy requires isolation",
+      "Lock-in and portability; approaches range from self-managed DBMS on cloud machines to managed DBaaS and cloud-native designs"
+    ],
+    "modelAnswer": "The cloud changes the ground rules: your data management runs on someone else's machines, shared with other tenants, in data centres far away. The challenges: elasticity - you want to scale up for load peaks and down again, paying only for what you use, so provisioning must be automatic; availability - at cloud scale hardware fails all the time, so the system must tolerate it, typically through replication across availability zones or regions; consistency - replicating across regions adds latency, so geo-distributed systems face the CAP trade-off again, now with distance; cost - storage is cheap but moving data out of the cloud is not, so egress and query patterns matter; and finally security, privacy and compliance - data may legally have to stay in particular countries - plus lock-in, since migrating a running system to another provider is painful. The approaches range from running your own DBMS on cloud machines, to managed database services that handle provisioning, backup and patching for you, to cloud-native designs that are built for elasticity from the start.",
+    "followUps": [
+      "Which challenge is specific to the cloud and not to distributed systems in general?",
+      "Why is egress cost a design driver for where you place computation?"
+    ],
+    "seconds": 240,
+    "source": "Lecture 8; H25 Assignment 2, Q8"
+  },
+  {
+    "id": "oral-l08-q03",
+    "type": "explain",
+    "topic": "Lecture 8: Scalable & Cloud Data Management",
+    "prompt": "a) State the CAP theorem and its practical consequence.\nb) How do the main NoSQL data models (key-value, document, wide-column, graph) fit into this picture?",
+    "hints": [
+      "Define each letter precisely, and ask which of the three a network makes unavoidable.",
+      "If partitions cannot be prevented, what is the real choice under a partition?",
+      "For each NoSQL model, ask what the query pattern is - and what that makes hard to partition."
+    ],
+    "keyPoints": [
+      "Consistency: every read returns the most recent write; Availability: every request gets a response; Partition tolerance: the system works despite network partitions",
+      "A distributed shared-data system cannot guarantee all three at once; partitions happen, so the practical choice is between C and A while partitioned (CP vs AP)",
+      "NoSQL stores commonly choose AP and relax consistency to eventual consistency (replicas converge over time)",
+      "Key-value: opaque keys to simple values - easy to partition the key space (e.g. Dynamo-style systems)",
+      "Document: self-describing JSON-like documents with flexible fields (e.g. MongoDB); wide-column: huge sparse tables organized in column families for massive write volumes (e.g. Cassandra, HBase)",
+      "Graph: nodes and edges for relationship traversal (e.g. Neo4j) - traversals cross nodes, so partitioning is harder",
+      "All four trade relational features (joins, full transactions) for scale, availability and schema flexibility"
+    ],
+    "modelAnswer": "CAP says that a distributed shared-data system cannot at the same time guarantee all three of: consistency - every read returns the most recent write; availability - every request gets a sensible response; and partition tolerance - the system keeps working when the network splits. Since partitions can always happen in a real network, you effectively choose between C and A while partitioned: a CP system refuses or blocks rather than serve stale data, an AP system answers, possibly with stale data. Many NoSQL stores choose AP and relax consistency to eventual consistency - replicas converge over time. Within that, the data models differ. Key-value stores map a key to an opaque value and do little else, so partitioning the key space scales them easily. Document stores keep self-describing documents, like JSON, with flexible fields. Wide-column stores organize very large sparse tables into column families, tuned for huge write volumes. Graph databases store nodes and edges and shine at traversing relationships - but since traversals cross nodes, graphs are harder to partition. Each model trades relational features - joins and full transactions - for scale, availability and flexibility.",
+    "followUps": [
+      "Give an application where eventual consistency is fine, and one where it is not.",
+      "Why is a graph database harder to shard than a key-value store?"
+    ],
+    "seconds": 240,
+    "source": "Lecture 8; H25 Assignment 2, Q8"
+  }
+]

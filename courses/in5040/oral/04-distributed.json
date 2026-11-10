@@ -1,0 +1,103 @@
+[
+  {
+    "id": "oral-l04-q01",
+    "type": "compare",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "a) What is the difference between a centralized and a distributed database system?\nb) What are the advantages and disadvantages of a distributed DBS?",
+    "hints": [
+      "Where do data and DBMS functionality physically sit in each system?",
+      "Distributed systems present one logical database - what does that illusion cost?",
+      "Think about failures, network latency and administration."
+    ],
+    "keyPoints": [
+      "Centralized: all data and all DBMS functions (storage, indexes, transaction and query processing) at one site",
+      "Distributed: data (and often processing) spread over several sites connected by a network, appearing as one logical database",
+      "Advantages: performance/parallelism, locality of access, availability (no single point of failure), incremental scalability",
+      "Disadvantages: complexity - distributed query processing and optimization, communication cost",
+      "Disadvantages: distributed transactions (commit, concurrency control), harder administration, security and consistency"
+    ],
+    "modelAnswer": "In a centralized DBS, all data and all DBMS functions - storage, indexes, transaction and query processing - sit at one site, and all users connect to that one machine. In a distributed DBS the data is spread over several sites connected by a network, but the system presents it as one logical database: users should not need to know where the data physically is. Distributing brings real advantages: performance, because data can be placed near where it is used and queries can run in parallel; availability, because a failure at one site need not stop the whole system; and incremental scalability, since you add sites instead of replacing a central machine. The price is complexity: query processing must optimize for network traffic, transactions that touch several sites need distributed commit and concurrency control, and administration and security get harder. So distribution is a trade-off between those benefits and the extra machinery needed to keep one logical system consistent.",
+    "followUps": [
+      "Which of the advantages would you give up first if you had to, and why?",
+      "What does 'one logical database' hide from the user?"
+    ],
+    "seconds": 210,
+    "source": "Lecture 4; H25 Assignment 2, Q4"
+  },
+  {
+    "id": "oral-l04-q02",
+    "type": "topic",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "Why would one choose a distributed database system instead of a centralized one? Give the main motivations.",
+    "hints": [
+      "Think about how organizations are shaped - where is data produced and used?",
+      "What happens to availability when one machine fails in each design?",
+      "How does each design grow when the load doubles?"
+    ],
+    "keyPoints": [
+      "Natural distribution: organizations have several sites and the data is produced and used locally",
+      "Performance: locality of reference keeps data near its users; parallel execution across sites",
+      "Availability/reliability: replicated data survives the failure of one site - no single point of failure",
+      "Scalability: grow incrementally by adding sites (scale out) instead of buying a bigger central machine",
+      "Economics: a cluster of commodity machines can be cheaper than one mainframe",
+      "Sharing: makes data available across the organization without physically merging the systems"
+    ],
+    "modelAnswer": "The motivations fall into four groups. First, the data is often naturally distributed: an organization with branches in several cities produces its data locally, and it is most useful close to where it is produced - locality of reference argues for placing it there. Second, performance and parallelism: a query touching several sites can use the processing power of all of them, and many small machines working in parallel can beat one big one. Third, availability and reliability: with replicated data, the failure of one site or machine does not make the data unavailable, which matters for critical applications. Fourth, economics and growth: a distributed system scales incrementally - you add a node when the load grows - while a centralized system forces you to replace the central machine with a bigger one. In addition, distribution lets an organization share data across sites without physically merging the databases, which is exactly the starting point for database integration.",
+    "followUps": [
+      "Which of these motivations still hold if the sites are connected by a slow, unreliable network?",
+      "Why is locality of reference such a strong argument in practice?"
+    ],
+    "seconds": 240,
+    "source": "Lecture 4; H25 Assignment 2, Q4"
+  },
+  {
+    "id": "oral-l04-q03",
+    "type": "explain",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "Distributed and multi-database systems can be classified along three dimensions:\na) Explain the dimensions autonomy, distribution and heterogeneity.\nb) Give an example of a system at the extreme of all three.",
+    "hints": [
+      "One dimension measures how independent each participating system is.",
+      "Another asks how different the participating systems are from each other.",
+      "Think of how a top-down homogeneous system compares to a federation of legacy systems."
+    ],
+    "keyPoints": [
+      "Autonomy: degree of independence of each local system - from none (fragments of one system) to full (locals keep their own users, admins and the right to join or leave)",
+      "Distribution: how data and processing are spread - centralized, client-server, or genuinely distributed with partitioned (and possibly replicated) data",
+      "Heterogeneity: differences in hardware, operating systems, DBMS products, data models and query languages",
+      "The three axes form a design space; each axis adds its own problems as you move out along it",
+      "Example positions: homogeneous top-down distributed DBMS (low on all) vs a heterogeneous federated MDBS (high on all)"
+    ],
+    "modelAnswer": "Systems are classified along three dimensions. Autonomy is the degree of independence of each participating system: from no autonomy at all - the local sites are just fragments of one system with no local users of their own - to full autonomy, where each local database keeps its own users, administrators and the right to join or leave the federation. Distribution describes how data and processing are spread: from centralized, via simple client-server, to genuinely distributed systems where the data is partitioned across sites, possibly with replication. Heterogeneity is the presence of differences between the components: hardware, operating systems, DBMS products, data models and query languages. A homogeneous distributed database designed top-down with one product sits at the corner with low heterogeneity and low autonomy; a federated multi-database system integrating existing, independent systems sits at the opposite corner, high on all three axes. The classification matters because complexity grows along every axis - from fragmentation and allocation questions to schema and semantic conflicts between autonomous systems.",
+    "followUps": [
+      "Where on the three axes would you place a modern microservice landscape with one database per service?",
+      "Which dimension causes the hardest problems in your opinion, and why?"
+    ],
+    "seconds": 210,
+    "source": "Lecture 4; H25 Assignment 2, Q4"
+  },
+  {
+    "id": "oral-l04-q04",
+    "type": "compare",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "Approaches to building a distributed database system:\na) What is the top-down (design) approach?\nb) What is the bottom-up (integration) approach?\nc) When is each realistic, and what are their trade-offs?",
+    "hints": [
+      "In which direction do you travel: from a clean global design to physical distribution, or from existing systems to a federation?",
+      "Which approach must cope with heterogeneous, autonomous local systems?",
+      "Ask what data already exists when the project starts."
+    ],
+    "keyPoints": [
+      "Top-down: design the global schema first, then fragment and allocate the fragments to sites; usually homogeneous",
+      "Bottom-up: integrate existing, autonomous databases behind a global (federated) layer; usually heterogeneous (MDBS)",
+      "Top-down gives control and simplicity but assumes a greenfield project with no legacy systems",
+      "Bottom-up matches organizational reality but must solve schema integration, conflicts and local autonomy",
+      "Bottom-up is the natural path to the heterogeneous multi-database systems of Lecture 5"
+    ],
+    "modelAnswer": "There are two opposite routes to a distributed database system. The top-down approach designs it: you start from the requirements, design the global conceptual schema, then fragment the data - horizontally, vertically - decide on replication and allocation of fragments to sites, and build everything with one DBMS or a small set of technologies. This gives a homogeneous, well-controlled system, but it assumes you are building from scratch. The bottom-up approach integrates: you start from the existing, autonomous databases that organizations already run, and put a global layer - a federation - on top that presents them as one system. This matches reality, where data already exists in legacy and local systems, but it is much harder: the global schema must be designed from heterogeneous local schemas, conflicts must be resolved, and local autonomy must be respected, because the locals cannot simply be reorganized. So the choice follows from the starting point: greenfield control with top-down, or legacy realism with bottom-up - and the bottom-up path leads directly into the multi-database integration problems.",
+    "followUps": [
+      "Why is schema integration the central difficulty in the bottom-up approach?",
+      "Can a project realistically mix both approaches?"
+    ],
+    "seconds": 210,
+    "source": "Lecture 4; H25 Assignment 2, Q4"
+  }
+]
