@@ -1,5 +1,17 @@
 node_modules/
+dist/
 .vercel/
 .env
 .env.*
 .DS_Store
+
+# Local agent skills (npx skills add … --agent cursor --copy); remove with: rm -rf .agents skills-lock.json
+.agents/
+skills-lock.json
+
+# Own study notes used to generate questions
+notes/
+
+# Only the README is committed; other notes (AGENTS.md, Plan.md, GPT prompts) stay local
+*.md
+!README.md
