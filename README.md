@@ -17,16 +17,16 @@ with your classmates.
 - Light and dark mode, works on phones, nickname + PIN login (no email collected).
 
 Plain HTML, CSS and JavaScript in `public/` (no build step), one Vercel function (`api/index.js`,
-routes in `lib/routes.js`) and Postgres. Tables are created automatically on first use.
+routes in `server/`) and Postgres. Tables are created automatically on first use.
 
 ## Make your own course site
 
 You need a GitHub account and a free Vercel account (sign in with GitHub).
 
 1. **Fork this repo** (or use it as a template) into your own GitHub account.
-2. **Edit `course.json`:** your course code, name, lecture list and source info (see
+2. **Edit `courses/<name>/course.json`** (one folder per course, see [Courses](#courses)): your course code, name, lecture list and source info (see
    [Course config](#course-config)).
-3. **Replace the demo questions** in `questions/` with your own (see
+3. **Replace the demo questions** in `courses/<name>/questions/` with your own (see
    [Questions](#questions)). Run `npm run check` to validate them.
 4. **Deploy on Vercel:** *Add New… → Project*, import your repo, and deploy. No build settings are
    needed; `vercel.json` has them.
@@ -65,9 +65,36 @@ Your repo is public if you forked it from here. Don't commit slides, book chapte
 other course material; they're usually copyrighted. Write your own questions and cite the material
 by slide and page number instead.
 
+## Courses
+
+The app code knows nothing about a particular course. Each course is a folder:
+
+```text
+courses/
+  in5040/
+    course.json   settings, lectures, which modes are on, oral options
+    questions/    quiz questions (multiple choice)
+    oral/         oral questions (used when "modes" has "oral" or "query" on; query practice
+                  is a round of only the write-a-query questions, typed in the code editor)
+    prompts/      GPT templates for writing questions and grading (not used by the app)
+```
+
+With one folder it is used automatically. With several, set the `COURSE` environment variable to
+the folder name (locally `COURSE=in5040 npm run dev`, on Vercel under *Settings → Environment
+Variables*). To start a new course, copy a folder, edit `course.json`, and replace the questions.
+
+Oral mode is optional. Its course-specific settings live under `"oral"` in `course.json`:
+
+- `speech.terms`: words speech-to-text should listen for; `speech.fixes`: `["pattern", "replacement"]`
+  pairs that correct common mishearings (for example `"\\bno[\\s-]?sequel\\b"` to `"NoSQL"`).
+- `query`: turns on write-a-query questions (`"type": "query"`) with a code editor: `language`,
+  `label`, `placeholder`, `grading` (what GPT should check), and `keywords`, `operators` and
+  `views` (a pattern) for highlighting. Without it, query questions are rejected by `npm run check`.
+- `exam`: `questions` and a short `note` describing the real exam.
+
 ## Course config
 
-Everything course-specific is in `course.json`:
+Everything course-specific is in `courses/<name>/course.json`:
 
 ```json
 {
@@ -187,7 +214,7 @@ before adding it. Fill in your lecture names and source style:
 | Correct again on a question you have already got right | +1 |
 | Wrong | 0 |
 
-The rule is in `lib/points.js`. A question is *mastered* while your latest answer to it is right,
+The rule is in `server/quiz/points.js`. A question is *mastered* while your latest answer to it is right,
 and a *mistake* while it's wrong. Mastered % always counts every question. The streak is cosmetic.
 
 ## Flagging bad questions
