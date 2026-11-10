@@ -1,0 +1,7 @@
+/* App-wide CSS. Astryx components carry their own styles; keep this file to page-level needs and
+   use theme tokens (var(--color-*), var(--spacing-*), var(--radius-*)) rather than raw values. */
+html,
+body,
+#root {
+  height: 100%;
+}

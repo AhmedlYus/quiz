@@ -1,0 +1,10 @@
+/* Doubled class: wins over the Grid's own single-class track template. */
+@media (min-width: 64rem) {
+  .dashboard.dashboard {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  }
+  .dashboard-aside {
+    position: sticky;
+    top: var(--spacing-4);
+  }
+}

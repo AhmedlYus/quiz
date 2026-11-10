@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
-  "outputDirectory": "public",
+  "outputDirectory": "dist",
   "regions": ["fra1"],
   "rewrites": [{ "source": "/api/:path*", "destination": "/api/index?route=:path*" }],
   "functions": {
-    "api/index.js": { "includeFiles": "{questions/**,course.json}" }
+    "api/index.js": { "includeFiles": "{courses/**/course.json,courses/**/questions/**,courses/**/oral/**,questions/**,course.json}" }
   }
 }

@@ -1,0 +1,8 @@
+/* Speech answer box extras. Scoped to the class passed to TextArea's controlClassName for the
+   listening state; colors come from theme tokens so it looks right in light and dark mode.
+   No animations, so prefers-reduced-motion is respected by design. */
+
+.speech-control-listening {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}

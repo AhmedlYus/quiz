@@ -6,11 +6,29 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "node scripts/dev.mjs",
-    "check": "node scripts/check-questions.mjs",
-    "build": "node scripts/check-questions.mjs"
+    "dev": "vite",
+    "check": "node scripts/check-questions.mjs && node scripts/check-oral.mjs",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run check && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "astryx": "node node_modules/@astryxdesign/cli/clients/cli/bin/astryx.mjs"
   },
   "dependencies": {
-    "postgres": "^3.4.5"
+    "@astryxdesign/core": "^0.7.12",
+    "@astryxdesign/theme-neutral": "^0.7.12",
+    "@stylexjs/stylex": "^0.19.1",
+    "lucide-react": "^1.71.0",
+    "postgres": "^3.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@astryxdesign/cli": "^0.7.12",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.7"
   }
 }

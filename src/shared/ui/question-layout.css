@@ -1,0 +1,17 @@
+/* Doubled classes win over the Grid's own track template. The pinned column sticks inside
+   AppShell's main area, which is the scroller. */
+@media (min-width: 64rem) {
+  .question-layout-split.question-layout-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .question-layout-aside.question-layout-aside {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+  .question-layout-split .question-layout-question,
+  .question-layout-aside .question-layout-answer {
+    position: sticky;
+    top: var(--spacing-4);
+    max-height: calc(100dvh - 9rem);
+    overflow: auto;
+  }
+}
