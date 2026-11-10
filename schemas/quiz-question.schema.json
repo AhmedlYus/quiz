@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quiz-question.schema.json",
+  "title": "Quiz question file",
+  "description": "A file in questions/ is a JSON list of multiple-choice questions. Checked by `npm run check` (lib/questions.js mirrors these rules).",
+  "type": "array",
+  "items": { "$ref": "#/$defs/question" },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "question", "options", "answer"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,80}$",
+          "description": "Unique and stable, e.g. 'l03-q07'. Never reuse or rename an id; give a changed question a new id."
+        },
+        "question": { "$ref": "#/$defs/text" },
+        "options": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/text" } },
+        "answer": { "type": "integer", "minimum": 0, "description": "0-based position of the correct option." },
+        "explanation": { "type": "string", "description": "Why the answer is right and why the most tempting wrong option is wrong." },
+        "source": { "type": "string" },
+        "topic": { "$ref": "#/$defs/text", "description": "Exactly one of the lecture names in course.json." },
+        "coverage": { "enum": ["slides", "pensum"] },
+        "code": { "type": "string", "description": "Code, a query or a table shown in a monospace block (\\n for new lines)." },
+        "shuffle": { "type": "boolean", "description": "false keeps the options in order." },
+        "hints": {
+          "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },
+          "description": "Revealed one at a time before answering; must not give the answer away."
+        }
+      }
+    }
+  }
+}

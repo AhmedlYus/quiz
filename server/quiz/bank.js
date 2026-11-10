@@ -1,8 +1,9 @@
-// Loads and validates the question bank from questions/*.json.
+// Loads and validates the quiz question bank from questions/*.json in the active course folder.
 import fs from 'node:fs';
 import path from 'node:path';
+import { coursePath } from '../config/course.js';
 
-const QUESTIONS_DIR = path.join(process.cwd(), 'questions');
+const QUESTIONS_DIR = coursePath('questions');
 let cache;
 
 export function validateQuestion(q, where) {
@@ -26,6 +27,9 @@ export function validateQuestion(q, where) {
     if (q[field] !== undefined && typeof q[field] !== 'string') errors.push(`${where}: ${field} must be text`);
   }
   if (q.shuffle !== undefined && typeof q.shuffle !== 'boolean') errors.push(`${where}: shuffle must be true or false`);
+  if (q.hints !== undefined && (!Array.isArray(q.hints) || q.hints.length > 5 || q.hints.some((x) => typeof x !== 'string' || !x.trim()))) {
+    errors.push(`${where}: hints must be a list of up to 5 non-empty texts`);
+  }
   if (q.coverage !== undefined && q.coverage !== 'slides' && q.coverage !== 'pensum') {
     errors.push(`${where}: coverage must be "slides" or "pensum"`);
   }
@@ -64,6 +68,7 @@ export function loadBank(dir = QUESTIONS_DIR) {
         topic: (q.topic || '').trim(),
         code: (q.code || '').replace(/\s+$/, '').replace(/^\n+/, ''),
         shuffle: q.shuffle !== false,
+        hints: (q.hints || []).map((x) => x.trim()),
         pensum: q.coverage === 'pensum',
         file,
       };

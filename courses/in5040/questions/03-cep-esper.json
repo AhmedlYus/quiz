@@ -1,0 +1,95 @@
+[
+  {
+    "id": "l03-q01",
+    "question": "Events arrive in this order. Which (a, b) pairs does the EPL statement output?",
+    "code": "Events of four types arrive in this order (A1 is the first A event, B1 the first B event, and so on):\n\nA1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4\n\nselect a, b\nfrom pattern [every a=A -> b=B]",
+    "options": [
+      "(A1,B1), (A1,B2), (A1,B3), (A1,B4)",
+      "(A1,B1) only",
+      "(A1,B1), (A2,B1), (A3,B2), (A4,B4)",
+      "(A1,B1), (A3,B2), (A4,B4)"
+    ],
+    "answer": 2,
+    "explanation": "every restarts the A part per A: A1 and A2 both wait for a B, and B1 completes both waiters - one B can serve several waiters. A3 pairs with B2, and since B3 arrives before A4, A4 pairs with B4. Option 0 is what 'A -> every B' would output; option 3 is what 'every (A -> B)' outputs; option 1 is what the pattern without any every outputs.",
+    "source": "Lecture 3; H25 Assignment 2, Q3",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "hints": [
+      "For every A that arrives, ask: which is the first B after it?",
+      "When B1 arrives, several waiters are open at the same time - which ones does it close?"
+    ]
+  },
+  {
+    "id": "l03-q02",
+    "question": "Same event order, but a slightly different pattern. Which (a, b) pairs does the statement output?",
+    "code": "Events of four types arrive in this order (A1 is the first A event, B1 the first B event, and so on):\n\nA1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4\n\nselect a, b\nfrom pattern [A -> every b=B]",
+    "options": [
+      "(A1,B1), (A1,B2), (A1,B3), (A1,B4)",
+      "(A1,B1), (A2,B1), (A3,B2), (A4,B4)",
+      "(A1,B1), (A2,B2), (A3,B3), (A4,B4)",
+      "(B1,A1), (B2,A1), (B3,A1), (B4,A1)"
+    ],
+    "answer": 0,
+    "explanation": "Here every binds to B: A matches once - the first A, A1 - and then every later B produces a new match with that same A. A2, A3 and A4 never take part, because the A side is never restarted. Option 1 is the result of 'every A -> B', and the last option has the order backwards: the arrow requires the B to arrive after the A.",
+    "source": "Lecture 3; H25 Assignment 2, Q3",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "hints": [
+      "How many A events can take part at all, given where every sits?",
+      "A has already matched - what happens on every later B?"
+    ]
+  },
+  {
+    "id": "l03-q03",
+    "question": "Now every wraps the whole sub-expression. Which (a, b) pairs does the statement output?",
+    "code": "Events of four types arrive in this order (A1 is the first A event, B1 the first B event, and so on):\n\nA1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4\n\nselect a, b\nfrom pattern [every (A -> B)]",
+    "options": [
+      "(A1,B1), (A2,B1), (A3,B2), (A4,B4)",
+      "(A1,B1), (A1,B2), (A1,B3), (A1,B4)",
+      "(A1,B1) only",
+      "(A1,B1), (A3,B2), (A4,B4)"
+    ],
+    "answer": 3,
+    "explanation": "every restarts the whole (A -> B) sub-expression only after a complete match. While the first instance waits for its B, A2 is ignored - the restart has not happened yet. After (A1,B1) the pattern waits for the next A: A3 pairs with B2, then A4 pairs with B4. Option 0 is 'every A -> B'; option 1 is 'A -> every B'; option 2 is the pattern without every.",
+    "source": "Lecture 3; H25 Assignment 2, Q3",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "hints": [
+      "The pattern restarts only after a complete (A,B) match - what happens to an A that arrives while a B is still pending?",
+      "Trace it: which A is the first one to arrive after the (A1,B1) match?"
+    ]
+  },
+  {
+    "id": "l03-q04",
+    "question": "Which statement correctly describes #length(7) and #length_batch(7) in Esper 8?",
+    "options": [
+      "#length(7) keeps the last 7 events and is re-evaluated on every new event, while #length_batch(7) holds events until 7 have arrived and then releases them as one batch.",
+      "#length(7) releases events in fixed batches of 7, while #length_batch(7) slides forward one event per arrival.",
+      "Both keep every event that ever arrived; they differ only in how the output is sorted.",
+      "#length(7) counts seconds, while #length_batch(7) counts events."
+    ],
+    "answer": 0,
+    "explanation": "#length(7) is a sliding window: it always holds the most recent 7 events and the statement updates on every arrival. #length_batch(7) is a tumbling window: it collects 7 events, releases them together, and then empties. Option 1 swaps the two descriptions; both views bound what is kept, so the second-to-last option is wrong; both count events, so the last option is wrong.",
+    "source": "Lecture 3; H25 mandatory Esper assignment",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "hints": [
+      "One of the two is sliding and the other tumbling - which is which?",
+      "Ask whether events stay in the window after it has been evaluated."
+    ]
+  },
+  {
+    "id": "l03-q05",
+    "question": "What does the every operator do in an Esper pattern?",
+    "options": [
+      "It requires all events of the pattern to occur within the same second.",
+      "It restarts the sub-expression it applies to after each of its matches, so the pattern can match again and again.",
+      "It changes the followed-by operator so the events may arrive in any order.",
+      "It makes the pattern fire once on the first complete match and then stop."
+    ],
+    "answer": 1,
+    "explanation": "every is a repetition operator: after the sub-expression it applies to has matched, it restarts that part, so the pattern can fire repeatedly. Option 4 describes exactly the opposite - the behavior of a pattern without any every, which matches only once. Options 0 and 3 describe things every does not do.",
+    "source": "Lecture 3; H25 Assignment 2, Q3",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "hints": [
+      "What happens after a pattern without every has matched once?",
+      "Where every is placed decides which part of the pattern gets repeated."
+    ]
+  }
+]

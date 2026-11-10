@@ -1,0 +1,85 @@
+{
+  "appName": "Quiz",
+  "code": "IN5040",
+  "name": "Advanced Database Systems for Big Data",
+  "tagline": "Practice for the oral exam: quiz yourself, then say it out loud",
+  "lectures": [
+    "Lecture 1: Introduction & Big Data Challenges",
+    "Lecture 2: Data Stream Processing",
+    "Lecture 3: Complex Event Processing & Esper",
+    "Lecture 4: Distributed Database Systems",
+    "Lecture 5: Database Integration & Multi-DBS",
+    "Lecture 6: Web Data Management",
+    "Lecture 7: Data Analysis & Data Warehouses",
+    "Lecture 8: Scalable & Cloud Data Management",
+    "Lecture 9: Large DBS & Performance Analysis"
+  ],
+  "sourceInfo": {
+    "pages": "the slides for Lecture {lecture}",
+    "pagesNoLecture": "the slides for this lecture",
+    "books": [
+      { "match": "özsu|ozsu|valduriez", "text": "Özsu & Valduriez: Principles of Distributed Database Systems, 4th ed. (2020)" },
+      { "match": "elmasri|navathe", "text": "Elmasri & Navathe: Fundamentals of Database Systems, 5th ed. or newer" },
+      { "match": "garcia|ullman|widom", "text": "Garcia-Molina, Ullman & Widom: Database Systems: The Complete Book, 2nd ed." },
+      { "match": "hueske|kalavri|flink", "text": "Hueske & Kalavri: Stream Processing with Apache Flink (2019)" }
+    ],
+    "documents": [
+      { "match": "assignment\\s*(\\d+)", "name": "Assignment $1", "doc": "the Assignment $1 description" }
+    ]
+  },
+  "modes": { "quiz": true, "oral": true, "query": true },
+  "features": { "leaderboard": false, "hints": true },
+  "oral": {
+    "speechLang": "en-US",
+    "timerSeconds": 180,
+    "examiner": "IN5040 (Advanced Database Systems for Big Data) at the University of Oslo",
+    "exam": {
+      "questions": 3,
+      "note": "Like the IN5040 oral exam: you get questions from different lectures and answer them out loud, then the examiner asks follow-ups."
+    },
+    "speech": {
+      "terms": ["Esper", "EPL", "CEP", "DSMS", "data stream", "sliding window", "tumbling window", "followed-by",
+        "NoSQL", "NewSQL", "OLAP", "CAP theorem", "multi-database system", "data warehouse", "snowflake schema", "star schema"],
+      "fixes": [
+        ["\\b(?:e\\s?s\\s?p\\s?e\\s?r|es per|s per|esper)\\b", "Esper"],
+        ["\\be\\.?\\s?p\\.?\\s?l\\b\\.?", "EPL"],
+        ["\\bc\\.?\\s?e\\.?\\s?p\\b\\.?", "CEP"],
+        ["\\bd\\.?\\s?s\\.?\\s?m\\.?\\s?s\\b\\.?", "DSMS"],
+        ["\\bd\\.?\\s?s\\.?\\s?p\\.?\\s?s\\b\\.?", "DSPS"],
+        ["\\bd\\.?\\s?b\\.?\\s?m\\.?\\s?s\\b\\.?", "DBMS"],
+        ["\\bm\\.?\\s?d\\.?\\s?b\\.?\\s?s\\b\\.?", "MDBS"],
+        ["\\bno[\\s-]?sequel\\b", "NoSQL"],
+        ["\\bnew[\\s-]?sequel\\b", "NewSQL"],
+        ["\\bsequel\\b", "SQL"],
+        ["\\bo[\\s-]?lap\\b", "OLAP"],
+        ["\\bo\\s?l\\s?t\\s?p\\b", "OLTP"],
+        ["\\bk\\s?d\\s?d\\b", "KDD"],
+        ["\\bx\\s?m\\s?l\\b", "XML"],
+        ["\\bjason\\b", "JSON"],
+        ["\\bcap theorem\\b", "CAP theorem"],
+        ["\\bmap[\\s-]?reduce\\b", "MapReduce"],
+        ["\\bfollowed[\\s-]by\\b", "followed-by"]
+      ]
+    },
+    "query": {
+      "language": "EPL",
+      "title": "Esper",
+      "label": "Your EPL statement",
+      "placeholder": "select … from …",
+      "grading": "whether the query would produce the required output in Esper 8.2, and why or why not",
+      "keywords": ["select", "from", "where", "group by", "having", "order by", "insert into", "into", "as",
+        "and", "or", "not", "pattern", "every", "match_recognize", "output", "snapshot", "first",
+        "last", "all", "join", "left", "right", "outer", "on", "unidirectional", "distinct", "create",
+        "schema", "window", "context", "partition", "by", "within", "timer:interval", "timer:within",
+        "prev", "prior", "count", "sum", "avg", "min", "max", "case", "when", "then", "else", "end",
+        "null", "is", "in", "between", "like"],
+      "operators": ["->"],
+      "views": "#\\w+(?:\\((?:[^()]|\\([^()]*\\))*\\))?|\\b(?:win|std):\\w+(?:\\((?:[^()]|\\([^()]*\\))*\\))?"
+    }
+  },
+  "directory": {
+    "enabled": false,
+    "url": "https://raw.githubusercontent.com/marenksa/quiz-arena/main/courses.json",
+    "hide": []
+  }
+}

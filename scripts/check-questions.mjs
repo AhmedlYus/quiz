@@ -1,8 +1,9 @@
-// Validates questions/*.json. Runs as the Vercel build, so a broken file blocks the deploy
+// Validates questions/*.json of the active course (see server/config/course.js). Runs as the Vercel build, so a broken file blocks the deploy
 // and the previous version stays live.
-import { loadBank } from '../lib/questions.js';
-import { LECTURES } from '../lib/course.js';
+import { loadBank } from '../server/quiz/bank.js';
+import { LECTURES, courseLabel } from '../server/config/course.js';
 
+console.log(`Course: ${courseLabel()}`);
 const { list, errors } = loadBank();
 const known = new Set(LECTURES);
 for (const q of list) {
