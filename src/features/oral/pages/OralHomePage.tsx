@@ -5,7 +5,6 @@ import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Grid } from '@astryxdesign/core/Grid';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Icon } from '@astryxdesign/core/Icon';
-import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import { Mic } from 'lucide-react';
 import { withTopic } from '@/shared/lib/format';
@@ -76,7 +75,6 @@ export default function OralHomePage() {
             />
             <ActionList actions={homeActions(data, oral)} />
           </Grid>
-          <Text type="supporting">Only your ratings are saved on the server.</Text>
         </DashboardLayout>
       )}
     </Page>

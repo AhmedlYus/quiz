@@ -16,15 +16,13 @@ type Props = {
   question: OralQuestion;
   value: string;
   onChange: (text: string) => void;
-  /** Finished text only (not words still being recognised), for saving. */
-  onSettled: (text: string) => void;
   onStart: () => void;
   isLocked?: boolean;
   label?: string;
   rows?: number;
 };
 
-export function AnswerArea({ question, value, onChange, onSettled, onStart, isLocked = false, label = 'Your answer', rows = 6 }: Props) {
+export function AnswerArea({ question, value, onChange, onStart, isLocked = false, label = 'Your answer', rows = 6 }: Props) {
   const oral = useOral();
   const showToast = useToast();
 
@@ -41,7 +39,6 @@ export function AnswerArea({ question, value, onChange, onSettled, onStart, isLo
           rows={7}
           onChange={(v) => {
             onChange(v);
-            onSettled(v);
             if (v.trim()) onStart();
           }}
         />
@@ -78,7 +75,6 @@ export function AnswerArea({ question, value, onChange, onSettled, onStart, isLo
         onChange(text);
         if (text.trim()) onStart();
       }}
-      onSettled={onSettled}
     />
   );
 }

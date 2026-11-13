@@ -2,6 +2,8 @@
 // SpeechRecognition (and SpeechRecognitionPhrase exists only in newer Chrome), so the minimal
 // types are declared here.
 
+import { storage } from '@/shared/lib/storage';
+
 export interface SpeechRecognitionAlternative {
   readonly transcript: string;
   readonly confidence: number;
@@ -67,6 +69,18 @@ const RecognitionCtor = speechWindow?.SpeechRecognition ?? speechWindow?.webkitS
 /** True when this browser exposes (webkit)SpeechRecognition. */
 export const isSpeechSupported: boolean = RecognitionCtor !== undefined;
 
+// Chrome has SpeechRecognitionPhrase but rejects phrases with 'phrases-not-supported' unless
+// recognition runs on-device (which hears less than its online service). A rejected start costs
+// the first words of an answer, so the rejection is remembered in this browser and biasing is
+// only tried again after PHRASES_RETRY_MS, in case a newer browser version accepts it.
+const PHRASES_KEY = 'qa-speech-phrases-rejected';
+const PHRASES_RETRY_MS = 30 * 24 * 60 * 60 * 1000;
+let phrasesSupported = Date.now() - storage.get<number>(PHRASES_KEY, 0) > PHRASES_RETRY_MS;
+export function disablePhrases(): void {
+  phrasesSupported = false;
+  storage.set(PHRASES_KEY, Date.now());
+}
+
 /**
  * Creates a configured recognizer: continuous, interim results, one alternative, and phrase
  * biasing towards the course's terms when the browser supports SpeechRecognitionPhrase
@@ -80,7 +94,7 @@ export function createRecognizer(opts: { lang: string; terms: string[] }): Speec
   rec.interimResults = true;
   rec.maxAlternatives = 1;
   const PhraseCtor = speechWindow?.SpeechRecognitionPhrase;
-  if (opts.terms.length && PhraseCtor && 'phrases' in rec) {
+  if (phrasesSupported && opts.terms.length && PhraseCtor && 'phrases' in rec) {
     try {
       rec.phrases = opts.terms.map((term) => new PhraseCtor(term, 5));
     } catch {

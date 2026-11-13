@@ -39,12 +39,6 @@ export default function OralHelpPage() {
         `${oral.exam.questions} questions from different lectures are drawn. You answer them one by one, with or without the timer, then check your answers against the key points and rate each one.`,
       ],
     ],
-    [
-      'Privacy',
-      [
-        'Only your ratings are saved on the server. What you say or type stays in this browser. Speech-to-text is done by your browser; in Chrome that means Google transcribes the audio.',
-      ],
-    ],
   ];
 
   return (

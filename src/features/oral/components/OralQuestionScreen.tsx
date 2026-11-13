@@ -28,7 +28,7 @@ type Props = {
 
 export function OralQuestionScreen({ question: q, mode, scope, onRated, onResync, hasTimer = true }: Props) {
   const showToast = useToast();
-  const { text, setText, save } = useSavedAnswer(q.id);
+  const { text, setText } = useSavedAnswer(q.id);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [wantsReveal, setWantsReveal] = useState(false);
   const [checked, setChecked] = useState<number[]>([]);
@@ -58,7 +58,7 @@ export function OralQuestionScreen({ question: q, mode, scope, onRated, onResync
       question={<QuestionPrompt question={q} hintsUsed={hintsUsed} onHint={setHintsUsed} isHintLocked={Boolean(reveal)} />}
       answer={
         <>
-          <AnswerCard question={q} value={text} onChange={setText} onSettled={save} isLocked={Boolean(reveal)} hasTimer={hasTimer}>
+          <AnswerCard question={q} value={text} onChange={setText} isLocked={Boolean(reveal)} hasTimer={hasTimer}>
             {!reveal && (
               <Button
                 label={isQuery ? 'Show the model query' : 'Show key points'}

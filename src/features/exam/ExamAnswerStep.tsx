@@ -37,7 +37,6 @@ export function ExamAnswerStep({ exam, progress }: { exam: ExamView; progress: E
             rows={8}
             value={state.answers[q.id] ?? ''}
             onChange={(text) => progress.setAnswer(q.id, text)}
-            onSettled={(text) => progress.setAnswer(q.id, text)}
           />
         }
       />

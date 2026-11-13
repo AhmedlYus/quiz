@@ -48,7 +48,7 @@ export function useExamProgress(startedAt: string) {
     state,
     setPhase: (phase: ExamPhase) => update((s) => ({ ...s, phase })),
     setIndex: (index: number) => update((s) => ({ ...s, index })),
-    /** Typed or recognised text. Saved on every change (typed edits never reach onSettled). */
+    /** Typed or recognised text. Saved on every change. */
     setAnswer: (id: string, text: string) => update((s) => ({ ...s, answers: { ...s.answers, [id]: text } })),
     setHints: (id: string, used: number) => update((s) => ({ ...s, hints: { ...s.hints, [id]: used } })),
     setChecked: (id: string, checked: number[]) => update((s) => ({ ...s, checked: { ...s.checked, [id]: checked } })),

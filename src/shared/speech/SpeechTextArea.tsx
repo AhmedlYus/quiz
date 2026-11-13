@@ -11,7 +11,7 @@ import { StatusDot } from '@astryxdesign/core/StatusDot';
 import { Text } from '@astryxdesign/core/Text';
 import { TextArea } from '@astryxdesign/core/TextArea';
 import { VStack } from '@astryxdesign/core/VStack';
-import type { JSX } from 'react';
+import { useEffect, type JSX } from 'react';
 import './speech.css';
 import { useSpeechToText } from './useSpeechToText';
 
@@ -25,7 +25,6 @@ export interface SpeechTextAreaProps {
   label: string;
   value: string;
   onChange: (text: string) => void;
-  onSettled?: (text: string) => void;
   onStart?: () => void;
   /** Recognition language, e.g. 'en-US'. */
   lang: string;
@@ -44,7 +43,6 @@ export function SpeechTextArea(props: SpeechTextAreaProps): JSX.Element {
     label,
     value,
     onChange,
-    onSettled,
     onStart,
     lang,
     terms,
@@ -54,9 +52,13 @@ export function SpeechTextArea(props: SpeechTextAreaProps): JSX.Element {
     placeholder,
   } = props;
 
-  const speech = useSpeechToText({ lang, terms, fixes, value, onChange, onSettled });
-  const { isSupported, isListening, error } = speech;
+  const speech = useSpeechToText({ lang, terms, fixes, value, onChange });
+  const { isSupported, isListening, error, stop } = speech;
   const helpId = `${id}-help`;
+
+  useEffect(() => {
+    if (isDisabled) stop();
+  }, [isDisabled, stop]);
 
   function toggleMic() {
     if (isListening) {
@@ -90,7 +92,10 @@ export function SpeechTextArea(props: SpeechTextAreaProps): JSX.Element {
         label={label}
         isLabelHidden
         value={value}
-        onChange={(text) => onChange(text)}
+        onChange={(text) => {
+          speech.edit(text);
+          onChange(text);
+        }}
         rows={rows}
         isDisabled={isDisabled}
         placeholder={

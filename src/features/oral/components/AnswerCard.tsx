@@ -15,7 +15,6 @@ type Props = {
   question: OralQuestion;
   value: string;
   onChange: (text: string) => void;
-  onSettled: (text: string) => void;
   /** Locked after the answer is revealed: no more typing or recording, the timer stops. */
   isLocked?: boolean;
   label?: string;

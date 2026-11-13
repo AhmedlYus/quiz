@@ -1,12 +1,13 @@
 // useSpeechToText: thin React wrapper around the framework-free createSpeechSession, so the
 // session logic stays testable without a DOM. The textarea is controlled: while listening, the
-// session reports base + live interim words through onChange so the words appear inside the box;
-// typed edits become the new base; onSettled carries settled text only, which callers persist.
+// session reports settled text + live interim words through onChange so the words appear inside
+// the box. The text box reports the user's own edits through edit(), which makes the edited text
+// the new starting point for what is heard next.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createRecognizer, isSpeechSupported } from './recognition';
+import { createRecognizer, disablePhrases, isSpeechSupported } from './recognition';
 import { createSpeechSession } from './session';
-import { compileFixes } from './termFixes';
+import { compileFixes, type TermFix } from './termFixes';
 
 export interface SpeechToTextOptions {
   /** Recognition language, e.g. 'en-US' (oral.speechLang in course.json). */
@@ -14,13 +15,11 @@ export interface SpeechToTextOptions {
   /** Course terms the recognizer should be biased towards (oral.speech.terms). */
   terms: string[];
   /** [pattern, replacement] term fixes (oral.speech.fixes); applied to finished phrases only. */
-  fixes: [string, string][];
+  fixes: TermFix[];
   /** The controlled text (what the textarea shows). */
   value: string;
   /** Called with settled text + the phrase still being recognised (the live textarea text). */
   onChange: (text: string) => void;
-  /** Called with settled text only (finished phrases, term fixes applied); callers persist it. */
-  onSettled?: (text: string) => void;
 }
 
 export interface SpeechToText {
@@ -28,49 +27,39 @@ export interface SpeechToText {
   isListening: boolean;
   start: () => void;
   stop: () => void;
+  /** Tell the session the user typed: `text` is the whole edited text. No-op when not listening. */
+  edit: (text: string) => void;
   error: string | null;
 }
 
 export function useSpeechToText(opts: SpeechToTextOptions): SpeechToText {
-  const { lang, terms, fixes, value } = opts;
-
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Always call the latest callbacks and use the latest course settings, without having to
+  // Always call the latest callback and use the latest course settings, without having to
   // recreate the session on every render.
-  const latest = useRef({ lang, terms, fixes, value, onChange: opts.onChange, onSettled: opts.onSettled });
-  latest.current = { lang, terms, fixes, value, onChange: opts.onChange, onSettled: opts.onSettled };
-
-  // The text this hook last asked to show. If the incoming value differs while listening,
-  // the user typed: the typed text becomes the new base (results are not re-added on top).
-  const emitted = useRef<string | null>(null);
+  const latest = useRef(opts);
+  latest.current = opts;
 
   const sessionRef = useRef<ReturnType<typeof createSpeechSession> | null>(null);
   if (sessionRef.current === null && isSpeechSupported) {
+    let fixes: TermFix[] | null = null;
+    let fix = (text: string) => text;
     sessionRef.current = createSpeechSession({
-      createRecognizer: () => {
-        const s = latest.current;
-        return createRecognizer({ lang: s.lang, terms: s.terms });
+      createRecognizer: () => createRecognizer({ lang: latest.current.lang, terms: latest.current.terms }),
+      fixText: (text) => {
+        if (fixes !== latest.current.fixes) {
+          fixes = latest.current.fixes;
+          fix = compileFixes(fixes);
+        }
+        return fix(text);
       },
-      fixText: (text) => compileFixes(latest.current.fixes)(text),
-      onChange: (text) => {
-        emitted.current = text;
-        latest.current.onChange(text);
-      },
-      onSettled: (text) => latest.current.onSettled?.(text),
+      onChange: (text) => latest.current.onChange(text),
       onListeningChange: setIsListening,
       onError: setError,
+      onPhrasesUnsupported: disablePhrases,
     });
   }
-
-  // Detect typing while listening: our own emitted updates come back as `value` unchanged;
-  // a different value means the user edited the text.
-  useEffect(() => {
-    const session = sessionRef.current;
-    if (!session || !session.isListening()) return;
-    if (emitted.current !== null && value !== emitted.current) session.setBase(value);
-  }, [value]);
 
   // Stop on unmount (also stops the auto-restart loop).
   useEffect(() => () => sessionRef.current?.stop(), []);
@@ -84,5 +73,10 @@ export function useSpeechToText(opts: SpeechToTextOptions): SpeechToText {
 
   const stop = useCallback(() => sessionRef.current?.stop(), []);
 
-  return { isSupported: isSpeechSupported, isListening, start, stop, error };
+  const edit = useCallback((text: string) => {
+    const session = sessionRef.current;
+    if (session?.isListening()) session.setBase(text);
+  }, []);
+
+  return { isSupported: isSpeechSupported, isListening, start, stop, edit, error };
 }
