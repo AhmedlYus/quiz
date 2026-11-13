@@ -1,0 +1,108 @@
+[
+  {
+    "id": "in5040-l06-q01",
+    "topic": "Lecture 6: Web Data Management",
+    "options": [
+      "A global transaction log",
+      "An inverted index mapping terms to document postings",
+      "A distributed DBMS wait-for graph",
+      "An XML schema for a crawler’s configuration"
+    ],
+    "explanation": "An inverted index associates terms with document identifiers, allowing candidate retrieval without scanning every page. Link-structure indexes instead represent hyperlinks, and transaction logs and wait-for graphs solve unrelated consistency problems.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 6-9; Özsu & Valduriez (2020), Ch.12 §12.2",
+    "question": "A Web search engine must quickly find documents containing the term \"replication\". Which data structure is most directly suited to this operation?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l06-q02",
+    "topic": "Lecture 6: Web Data Management",
+    "options": [
+      "Because HTML cannot contain database data",
+      "Because crawlers follow discoverable URLs and may not generate the required form queries or access private interfaces",
+      "Because inverted indexes cannot represent words from dynamic pages",
+      "Because the content necessarily belongs to the dark Web"
+    ],
+    "explanation": "The hidden/deep Web can require submitting form parameters or invoking APIs to reveal results. A crawler following linked pages alone cannot enumerate arbitrary source queries; deep Web does not imply the dark Web or an index-format limitation.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 20-22; Özsu & Valduriez (2020), Ch.12 §12.5",
+    "question": "A university site exposes millions of records only as results of submitting search forms, with no links to every result. Why does ordinary link-based crawling miss much of this data?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l06-q04",
+    "topic": "Lecture 6: Web Data Management",
+    "options": [
+      "Shredding XML into relations",
+      "Applying PageRank to XML nodes",
+      "Updating every RDF replica",
+      "Using one-copy serializability to publish XML"
+    ],
+    "explanation": "XML shredding maps document content and (as necessary) structure into relational tables. XML publishing/composing goes in the opposite direction, generating XML from database contents; a native XML store preserves documents as first-class data.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 27-32",
+    "question": "A relational DBMS parses incoming XML documents and distributes their elements, attributes and identifiers among relational tables. What does this operation describe?",
+    "answer": 0
+  },
+  {
+    "id": "in5040-l06-q06",
+    "topic": "Lecture 6: Web Data Management",
+    "options": [
+      "RDF facts are subject–predicate–object triples forming a labeled graph, whereas XML naturally stores an ordered element hierarchy",
+      "RDF is necessarily a table with exactly three columns on disk",
+      "XML cannot represent relationships between objects",
+      "RDF subjects must always be plain text literals"
+    ],
+    "explanation": "RDF defines a logical graph of triples, independent of one physical storage layout. XML primarily models nested ordered document structure; it may encode references, so claiming that XML can never represent relationships is too strong.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 37-42; Özsu & Valduriez (2020), Ch.12 §12.6.2",
+    "question": "Which statement correctly distinguishes RDF from a typical XML tree?",
+    "answer": 0
+  },
+  {
+    "id": "in5040-l06-q07",
+    "topic": "Lecture 6: Web Data Management",
+    "options": [
+      "SELECT ?s WHERE { ?s <urn:studiesAt> <urn:uio> . }",
+      "SELECT ?s WHERE { ?s <urn:uio> <urn:studiesAt> . }",
+      "SELECT ?s WHERE { <urn:uio> <urn:studiesAt> ?s . }",
+      "SELECT ?s WHERE { ?s <urn:studiesAt> <urn:other> . }"
+    ],
+    "explanation": "The first SPARQL triple pattern uses the correct subject variable, predicate urn:studiesAt and object urn:uio; it binds ?s to student 7. The other patterns reverse predicate/object or select the other student.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 40-42; Özsu & Valduriez (2020), Ch.12 §12.6.2",
+    "question": "An RDF graph contains (urn:student:7, urn:studiesAt, urn:uio) and (urn:student:8, urn:studiesAt, urn:other). Which query pattern finds only student 7?",
+    "answer": 0
+  },
+  {
+    "id": "in5040-l06-q08",
+    "topic": "Lecture 6: Web Data Management",
+    "options": [
+      "A subject-centered property table containing those columns",
+      "A single unindexed triple table, guaranteed to outperform every alternative",
+      "A collection of unrelated XML files without an index",
+      "A global wait-for graph reused as an RDF index"
+    ],
+    "explanation": "Grouping co-occurring predicates into a property table permits many same-subject values to be retrieved together, often reducing star-query joins. Sparse or multivalued properties can make such tables inefficient, so it is not an unconditional winner.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 45-47",
+    "question": "Most RDF queries request name, email and department for the same subject (a star pattern). What physical layout may avoid repeated joins when the properties usually occur together?",
+    "answer": 0
+  },
+  {
+    "question": "Given the XML document in the code block, which XPath expression selects the title element of the book whose id is b2?",
+    "options": [
+      "/catalog/book[@id='b2']/title",
+      "/catalog/title[@id='b2']",
+      "/catalog/book/title[@id='b1']",
+      "//book/@title"
+    ],
+    "answer": 0,
+    "code": "<catalog>\n  <book id=\"b1\"><title>DBMS</title></book>\n  <book id=\"b2\"><title>Web Data</title></book>\n</catalog>",
+    "explanation": "The correct path descends through catalog/book, filters the book element on its id attribute with [@id='b2'], then selects its title child. XPath navigates document hierarchy; @title would refer to an attribute, not the title element.",
+    "coverage": "pensum",
+    "source": "Özsu & Valduriez (2020), Ch. 12 §12.6.2 (XML path/query languages); Lecture 6 slides 23–26 introduce XML documents.",
+    "id": "in5040-l06-q11",
+    "topic": "Lecture 6: Web Data Management"
+  }
+]

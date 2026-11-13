@@ -1,0 +1,77 @@
+[
+  {
+    "id": "in5040-l08-q01",
+    "question": "A hospital has three scans from each patient. Which train/test split best avoids leakage when evaluating a disease-classification model?",
+    "options": [
+      "Keep all scans from one patient in the same partition",
+      "Train on augmented images and test on their originals",
+      "Select the split that gives the highest test accuracy",
+      "Randomly split all scans, even when the same patient appears in both sets"
+    ],
+    "answer": 0,
+    "explanation": "Patient-level separation prevents a model from exploiting highly similar images from one patient in both training and testing. Random image-level splits can inflate reported generalization.",
+    "source": "L8 Medicine slides 29-42 (medical datasets, splitting, data processing) and 49-59 (model development and evaluation).",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l08-q02",
+    "question": "A classifier detects no positive cases in a cohort with 90 negatives and 10 positives. It calls everyone negative. What are accuracy and positive-class sensitivity?",
+    "options": [
+      "50% accuracy and 50% sensitivity",
+      "100% accuracy and 100% sensitivity",
+      "90% accuracy and 0% sensitivity",
+      "0% accuracy and 90% sensitivity"
+    ],
+    "answer": 2,
+    "explanation": "Ninety of 100 labels are correct, so accuracy is 90%. It finds zero of ten positives, so sensitivity is zero. This is why class prevalence and clinically relevant error costs matter.",
+    "source": "L8 Medicine slides 40-56 (data quality, model selection and performance); instructional example.",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l08-q03",
+    "question": "For a segmentation model, the predicted tumor has 80 positive voxels, ground truth has 100, and overlap contains 60. What is the Dice similarity coefficient?",
+    "options": [
+      "0.60",
+      "0.667",
+      "0.80",
+      "0.30"
+    ],
+    "answer": 1,
+    "explanation": "Dice = 2|P ∩ G|/(|P|+|G|)=120/180≈0.667. Raw accuracy over predominantly background voxels is not an adequate substitute for overlap evaluation.",
+    "source": "L8 Medicine slides 13-18 (segmentation applications) and 50-58 (model evaluation); instructional Dice calculation.",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l08-q05",
+    "question": "A PET image and a CT image from one patient are combined for prediction. What is the central data-management challenge?",
+    "options": [
+      "Their spatial alignment, acquisition protocols and patient identifiers must be reconciled",
+      "Their labels must always be ignored",
+      "They necessarily have identical geometry and acquisition times",
+      "They are both plain-text files and require no metadata"
+    ],
+    "answer": 0,
+    "explanation": "Multimodal learning can combine complementary information, but registration/alignment, metadata and identity consistency are required. Different modalities are not automatically in a shared coordinate system.",
+    "source": "L8 Medicine slides 13-17 and 40-47 (multimodal medical data and variability).",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l08-q07",
+    "question": "A lab wants to reproduce a tumor segmentation result after changing labels and preprocessing code. Which artifact set is most useful?",
+    "options": [
+      "Only the final test accuracy",
+      "Raw image and exact label, split, preprocessing, code and model versions",
+      "Only a screenshot of the output",
+      "Only the model file name without its contents"
+    ],
+    "answer": 1,
+    "explanation": "Data and model lineage connects inputs, preprocessing, annotations, code and checkpoints. A metric alone cannot explain or reproduce a result when the data or pipeline changes.",
+    "source": "L8 Medicine slides 47-48 and 59-70 (data saved, experimentation and model management).",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "coverage": "slides"
+  }
+]

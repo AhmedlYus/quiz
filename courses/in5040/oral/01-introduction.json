@@ -1,0 +1,67 @@
+[
+  {
+    "id": "oral-in5040-l01-q01",
+    "type": "explain",
+    "topic": "Lecture 1: Introduction & Big Data Challenges",
+    "prompt": "Explain the five Vs of Big Data. Use a single practical application to show why they create different technical problems.",
+    "keyPoints": [
+      "Volume: amount of data and capacity requirements",
+      "Velocity: arrival speed and processing-latency requirements",
+      "Variety: schemas/formats and integration effort",
+      "Veracity: data quality and trustworthiness",
+      "Value: useful insights or decisions and an example connecting the Vs"
+    ],
+    "modelAnswer": "The five Vs describe distinct dimensions of a data-management workload. Volume concerns the amount of data to store and query, so it can demand partitioning and parallel processing. Velocity concerns the rate at which records arrive and how quickly we must act; a live stream processor can be appropriate. Variety means combining different formats and schemas, which requires integration. Veracity is the reliability of those records, including missing or inconsistent readings. Value asks whether analysis actually leads to useful decisions. For example, a logistics service handles billions of orders (volume), frequent GPS updates (velocity), tables and sensor messages (variety), unreliable location estimates (veracity), and uses the cleaned data to predict delays (value). The Vs overlap but are not synonyms.",
+    "source": "L1 Challenges, slides 3–4.",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "Which V is most directly concerned with reconciling customer IDs from two companies?",
+      "What happens if you scale storage without improving veracity?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l01-q02",
+    "type": "topic",
+    "topic": "Lecture 1: Introduction & Big Data Challenges",
+    "prompt": "Explain the five Big Data research challenges in the Beckman report. How are these different from the five Vs?",
+    "keyPoints": [
+      "Scalable big/fast data infrastructures",
+      "Data diversity and integration across systems",
+      "End-to-end data-to-knowledge pipelines",
+      "Elastic cloud data services and their systems issues",
+      "Human roles throughout the data lifecycle",
+      "Five Vs are workload characteristics, not the same research agenda"
+    ],
+    "modelAnswer": "Beckman’s five directions are research problems in how we build and use data systems. First, scalable big/fast infrastructures must cope with large, rapid workloads on distributed hardware. Second, diverse data and different engines must be integrated across incompatible formats and semantics. Third, the entire data-to-knowledge pipeline needs ingestion, cleaning, metadata, provenance, transformation and analysis; storing raw bits is not enough. Fourth, cloud services raise elasticity, multitenancy, performance isolation, replication and cost concerns. Fifth, people are involved as data producers, curators, consumers and communities, so usability and collaboration matter. The five Vs are a separate descriptive classification of volume, velocity, variety, veracity and value. For example, variety is a property of data, while designing reliable cross-platform integration is a research challenge prompted by variety.",
+    "source": "L1 Challenges, slides 4–10; Beckman Report (2016), Research Challenges.",
+    "coverage": "slides",
+    "seconds": 240,
+    "followUps": [
+      "Give a concrete difference between heterogeneity and integration.",
+      "Why is metadata essential in an end-to-end analytics workflow?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l01-q04",
+    "type": "compare",
+    "topic": "Lecture 1: Introduction & Big Data Challenges",
+    "prompt": "Compare transactional databases, analytical data warehouses and stateful stream processing using the architecture diagrams at the end of L1.",
+    "keyPoints": [
+      "OLTP serves short durable reads and writes with transactions",
+      "Warehouse/OLAP integrates historical data through ETL",
+      "ETL scheduling introduces data-freshness delay",
+      "Stream engine processes event logs continuously with local state",
+      "Checkpointing/replay help recover stateful computations",
+      "Select architectures according to workload; they are complementary"
+    ],
+    "modelAnswer": "A transactional database supports operational applications such as placing orders, updating balances and enforcing transaction consistency. A data warehouse collects data from several operational sources through ETL and is optimized for historical and analytical queries. Because ETL often runs periodically, fresh events may not appear in reports immediately. In stateful stream processing, a durable event log feeds a continuously running computation; local state lets it keep running counts, joins or patterns, and the results can update dashboards or other systems with low latency. State must be recoverable using checkpoints and replayable input. These models complement one another: the same order may be stored in OLTP, counted immediately in a stream processor, and analyzed with other historical orders in a warehouse. Microservices can further separate application ownership, but introduce distributed consistency issues.",
+    "source": "L1 Challenges, slides 23–29; Flink, chapter 1.",
+    "coverage": "slides",
+    "seconds": 240,
+    "followUps": [
+      "Why does a warehouse not necessarily satisfy fraud-alert latency?",
+      "What risks appear when several services exchange events?"
+    ]
+  }
+]

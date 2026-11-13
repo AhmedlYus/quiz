@@ -1,0 +1,152 @@
+[
+  {
+    "id": "in5040-l02-q01",
+    "question": "What makes a continuous query fundamentally different from a one-time DBMS query?",
+    "options": [
+      "It can only execute SQL without WHERE",
+      "It is registered to process arriving stream data over time and may maintain evolving results or output streams",
+      "It always sees the complete future stream before producing output",
+      "It must permanently store every record"
+    ],
+    "answer": 1,
+    "explanation": "Continuous queries keep running as data arrives; one-time queries are evaluated over a fixed data snapshot.",
+    "source": "L2 Stream Processing, slides 7–9, 35–38; Babcock et al., §2.1.",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q02",
+    "question": "Which operator requires state even when each incoming event is processed individually?",
+    "options": [
+      "A map that converts Celsius to Fahrenheit",
+      "A filter that forwards temperature > 30",
+      "A running count of events per weather station",
+      "A field projection of stationName"
+    ],
+    "answer": 2,
+    "explanation": "The count for a station depends on preceding events. A pure map, filter and projection can process records independently.",
+    "source": "L2 Stream Processing, slides 13–19 and 60–69; Flink, chapter 2 (stateless/stateful operators).",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q04",
+    "question": "For arrivals A1, B1, A2, B2, A3, which is the count-based sliding window of size 3 immediately after B2?",
+    "options": [
+      "[A1, B1, A2]",
+      "[B1, A2, B2]",
+      "[A2, B2, A3]",
+      "[A1, B1, A2, B2]"
+    ],
+    "answer": 1,
+    "explanation": "After four arrivals the most recent three are arrivals 2–4. [A1,B1,A2] is the prior window, not the one after B2.",
+    "source": "L2 Stream Processing, slides 20–24 (sliding/count windows).",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q05",
+    "question": "What distinguishes a tumbling count window of 3 from a sliding count window of 3 with slide 1?",
+    "options": [
+      "Tumbling windows can never aggregate data",
+      "A tumbling window groups non-overlapping triples; sliding windows overlap and reuse events in successive windows",
+      "Sliding windows use timestamps while tumbling windows cannot",
+      "Both produce identical membership and output timing"
+    ],
+    "answer": 1,
+    "explanation": "With records A,B,C,D, a tumbling window completes [A,B,C], whereas the rolling length-3 window next contains [B,C,D].",
+    "source": "L2 Stream Processing, slides 20–26; Golab & Özsu, §3.1.",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q06",
+    "question": "A mobile sensor records events at 10:01–10:03 while offline and sends them all at 10:10. Which claim is correct?",
+    "options": [
+      "Event time necessarily equals the server arrival time",
+      "Event-time windows use event timestamps; processing-time windows use the operator clock, so assignments can differ",
+      "Both window types always reconstruct the same minutes",
+      "The events cannot be processed because they are late"
+    ],
+    "answer": 1,
+    "explanation": "Event time captures when something happened; processing time captures when the engine observes/processes it. Late data policy affects handling.",
+    "source": "L2 Stream Processing, slides 28–35; Flink, chapter 2 (time semantics).",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q07",
+    "question": "In event-time stream processing, what is the best interpretation of a watermark with timestamp T?",
+    "options": [
+      "A cryptographic proof that no earlier-timestamp event can arrive",
+      "A progress estimate/assumption used to determine when event-time operations may advance",
+      "An instruction to permanently stop every query",
+      "The processing-time clock of the CPU"
+    ],
+    "answer": 1,
+    "explanation": "Watermarks signal expected event-time progress. Straggling events can still arrive later, so engines need late-event policies.",
+    "source": "L2 Stream Processing, slides 29–36; Flink, chapter 2 (watermarks).",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q09",
+    "question": "When might an approximate synopsis be preferable to an exact stream computation?",
+    "options": [
+      "When the query can be answered exactly with zero state",
+      "When bounded memory or input rate prevents exact historical computation and the application can tolerate controlled error",
+      "Whenever the developer dislikes writing SQL",
+      "Only when queries are one-time and never run on streams"
+    ],
+    "answer": 1,
+    "explanation": "Sampling, histograms and sketches trade fidelity for resource use. Approximation should reflect the application’s acceptable error, not convenience.",
+    "source": "L2 Stream Processing, slides 44–48; Babcock et al., §§4.1–4.3 and 6.",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q10",
+    "question": "In the hospital stream-join example, why is dropping random events potentially dangerous under overload?",
+    "options": [
+      "Dropping records always improves medical accuracy",
+      "All events have identical urgency and utility",
+      "Discarding urgent patients can undermine the critical results even if throughput improves",
+      "The join output is unaffected by filtering before the join"
+    ],
+    "answer": 2,
+    "explanation": "Load shedding needs application-aware QoS/utility choices; the lecture’s triage filter prioritizes critical patients rather than shedding indiscriminately.",
+    "source": "L2 Stream Processing, slides 50–59 (hospital network, triage and QoS).",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q11",
+    "question": "Why do distributed stateful Flink jobs need checkpoints when the live state is already kept in a state backend?",
+    "options": [
+      "The backend automatically makes every side effect globally transactional",
+      "A checkpoint provides a recoverable, consistent state and source-position snapshot after failures",
+      "A checkpoint is identical to scaling out a worker",
+      "Checkpointing is needed only for stateless filters"
+    ],
+    "answer": 1,
+    "explanation": "Live local state can be lost when tasks fail. Distributed checkpoints and replayable inputs allow restoring a consistent logical computation.",
+    "source": "L2 Stream Processing, slides 63–69 and 75–83; Flink, chapters 2–3.",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l02-q12",
+    "question": "Which statement about at-least-once versus exactly-once is accurate?",
+    "options": [
+      "At-least-once means some records are processed zero times",
+      "Exactly-once managed state automatically guarantees an external email is sent once",
+      "At-least-once permits duplicates after replay; exactly-once managed state avoids duplicate logical effects in recovered state under its assumptions",
+      "Exactly-once means a system will never crash"
+    ],
+    "answer": 2,
+    "explanation": "Recovery may replay events; consistent snapshots prevent duplicate logical effects on managed state. External sinks require compatible guarantees.",
+    "source": "L2 Stream Processing, slides 75–78; Flink, chapter 2 (consistency guarantees).",
+    "topic": "Lecture 2: Data Stream Processing",
+    "coverage": "slides"
+  }
+]

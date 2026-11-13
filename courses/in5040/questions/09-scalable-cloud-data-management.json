@@ -1,0 +1,137 @@
+[
+  {
+    "id": "in5040-l09-q01",
+    "question": "A data service doubles its worker nodes but a global lock serializes every transaction. What is the most defensible performance prediction?",
+    "options": [
+      "The lock can remain the bottleneck; adding nodes alone does not guarantee useful speed-up",
+      "CAP theorem guarantees perfect scalability",
+      "Replication automatically removes any global coordination",
+      "Throughput must double because the cluster has twice the CPUs"
+    ],
+    "answer": 0,
+    "explanation": "A serial critical section limits speed-up and may dominate throughput. Horizontal scaling only helps when meaningful work can be partitioned and coordination costs remain manageable.",
+    "source": "L9 Scalable Data Management slides 2-4 (scale-out, throughput and cloud elasticity).",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q02",
+    "question": "Which statement correctly distinguishes sharding from replication?",
+    "options": [
+      "Sharding is only possible in a shared-memory machine",
+      "Replication increases the amount of distinct logical data stored without any extra disk usage",
+      "Sharding distributes distinct records; replication maintains redundant copies of the same records",
+      "Sharding and replication both mean duplicating every record onto every node"
+    ],
+    "answer": 2,
+    "explanation": "Sharding partitions responsibility for records, while replication creates redundant copies for availability, locality or reads. They can be combined but have different capacity and consistency effects.",
+    "source": "L9 slides 3-6 (shared-nothing/cloud distribution and storage); Özsu & Valduriez, Principles of Distributed Database Systems, ch. 10, pp. 449-456.",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q04",
+    "question": "Two replicas are disconnected. DB1 accepts write x = 10; DB2 has x = 0. To preserve linearizable reads during the partition, what must DB2 avoid?",
+    "options": [
+      "Losing availability for that request",
+      "Refusing a request it cannot answer consistently",
+      "Blocking until it can determine a safe result",
+      "Returning the stale x = 0 as if it were current after the completed write"
+    ],
+    "answer": 3,
+    "explanation": "Serving x=0 after a completed x=10 write would violate the single-copy latest-value view if the write is ordered before the read. A CP-style choice can block or reject the read at DB2, sacrificing availability.",
+    "source": "L9 slides 7-10 (CAP and replication); Özsu & Valduriez, ch. 11 §11.1 (CAP meaning).",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q06",
+    "question": "A web application reads shopping carts almost exclusively by cart ID and wants flexible values at large scale. Which data model is the most natural primary fit?",
+    "options": [
+      "A pure OLAP cube indexed exclusively by date",
+      "A static PDF archive with no query API",
+      "Key-value store",
+      "Graph-only traversal store"
+    ],
+    "answer": 2,
+    "explanation": "The key-value model directly supports access by known key and a flexible value. It does not by itself provide rich joins or arbitrary relationship traversals.",
+    "source": "L9 slides 11-13 and 19 (NoSQL families and key-value stores); Özsu & Valduriez, ch. 11 §11.2.",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q07",
+    "question": "An investigation repeatedly traverses relationships among suspects, companies, addresses and transactions. Which database model best matches the central query pattern?",
+    "options": [
+      "Key-value store without any secondary structure",
+      "Graph data model with explicit edges and traversal operations",
+      "A data lake that does not permit graph processing",
+      "Document storage alone because relationships never matter"
+    ],
+    "answer": 1,
+    "explanation": "Graph stores represent entities and links directly, making multi-hop traversals and pattern queries a natural operation. Simple key-value lookup has no inherent graph traversal language.",
+    "source": "L9 slides 16 and 19 (graph DBMS and workload mapping); Özsu & Valduriez, ch. 11 §11.5.",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q09",
+    "question": "Why might an enterprise prefer a NewSQL/distributed SQL system over a simple key-value store for a transactional ledger?",
+    "options": [
+      "It offers relational SQL and transactional semantics while aiming to distribute workload; coordination still costs something",
+      "It guarantees zero network latency for cross-partition transactions",
+      "It prevents use of secondary indexes and joins",
+      "It necessarily sacrifices all transaction guarantees to scale"
+    ],
+    "answer": 0,
+    "explanation": "NewSQL aims to combine SQL/ACID-style transactional capabilities with distributed scaling. It does not eliminate costs of consensus, coordination and multi-partition operations.",
+    "source": "L9 slides 18-19 (NewSQL goals and use cases); Özsu & Valduriez, ch. 11 §11.6.",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q10",
+    "question": "What is the defining challenge a polystore addresses?",
+    "options": [
+      "Removing the need to translate queries or reconcile schema semantics",
+      "Replacing every data model with a single flat text file",
+      "Making multiple heterogeneous stores queryable through a coordinated interface and processing plan",
+      "Forcing every source to use one identical physical storage engine"
+    ],
+    "answer": 2,
+    "explanation": "Polystores integrate SQL, NoSQL and other engines while retaining specialized stores. Query translation, placement of computation and heterogeneous semantics are central difficulties.",
+    "source": "L9 slides 20-24 (polystores, loose/tight coupling); Özsu & Valduriez, ch. 11 §11.7.",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l09-q11",
+    "question": "Which feature is characteristic of the original Google File System (GFS) design described in the assigned distributed storage reading?",
+    "options": [
+      "A central master manages metadata and clients transfer all file payload through it",
+      "Files are stored in chunks at chunk servers, and clients obtain locations from the master then access chunk servers",
+      "Each client must copy every file in its entirety before any read",
+      "It stores only relational rows in a conventional OLTP table"
+    ],
+    "answer": 1,
+    "explanation": "GFS separates metadata management (master) from chunk payload storage (chunk servers). After locating chunks via the master, clients read data from chunk servers rather than routing file bytes through the master.",
+    "source": "Özsu & Valduriez, Principles of Distributed Database Systems, ch. 10, printed pp. 453-456 (GFS architecture).",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "pensum"
+  },
+  {
+    "id": "in5040-l09-q12",
+    "question": "A distributed table is hash-partitioned by customer_id, but one customer produces most traffic. Why can adding workers fail to improve this workload?",
+    "options": [
+      "Skew is possible only in a single-machine DBMS",
+      "Increasing workers always reduces per-key coordination",
+      "Hash partitioning always redistributes one hot key across all workers",
+      "The hotspot may remain assigned to one partition/worker, making it the straggler"
+    ],
+    "answer": 3,
+    "explanation": "All records for one join/partition key may map to the same worker. That worker dominates latency, so extra idle workers provide little benefit unless the design addresses hot keys or skew.",
+    "source": "L9 slides 2-4 (partitionable scale-out) and Özsu & Valduriez ch. 11 (distributed partitioning); applied reasoning.",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "coverage": "slides"
+  }
+]

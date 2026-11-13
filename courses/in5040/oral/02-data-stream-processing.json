@@ -1,0 +1,109 @@
+[
+  {
+    "id": "oral-in5040-l02-q01",
+    "type": "compare",
+    "topic": "Lecture 2: Data Stream Processing",
+    "prompt": "What is a data stream management system, and how does its query model differ from a traditional database system?",
+    "keyPoints": [
+      "Conventional DBMS normally queries stored, relatively persistent relations",
+      "Stream inputs arrive online and are potentially unbounded",
+      "Continuous queries stay registered and update/emit results over time",
+      "Operator graph connects sources, transformations, state and sinks",
+      "Memory, arrival order, load variability and latency drive design trade-offs"
+    ],
+    "modelAnswer": "A traditional DBMS typically receives a one-time query against a stored database snapshot and can randomly access persistent records. A data stream management system instead processes a potentially unbounded sequence whose records arrive online, sometimes rapidly and out of order. A continuous query is installed once; as new tuples arrive it updates maintained results or emits an output stream. The query is implemented as an operator graph from sources through operations such as filtering, aggregating and joining to sinks. Some operators need state, but available memory is finite while the incoming stream may not be. Therefore stream systems need windows, incremental execution, adaptive plans and sometimes approximations or load shedding, particularly when results have tight latency requirements. A modern system can combine streaming with persistent tables; these are different workload models, not mutually exclusive products.",
+    "source": "L2 Stream Processing, slides 4–19 and 35–39; Babcock et al. (2002), §§1–2; Golab & Özsu (2003), §1.",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "Can a continuous stateless filter run without a window?",
+      "Why do stream joins often need state?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l02-q02",
+    "type": "walkthrough",
+    "topic": "Lecture 2: Data Stream Processing",
+    "prompt": "Trace the first completed windows for this event stream. Explain both a tumbling count window of 3 and a sliding count window of 3 with slide 1.",
+    "keyPoints": [
+      "Tumbling windows do not overlap and close on every three arrivals",
+      "Sliding windows of size 3 retain the latest three records",
+      "State the first two tumbling windows correctly",
+      "State the first two sliding windows correctly",
+      "Explain why output timing and overlap differ"
+    ],
+    "modelAnswer": "The stream is A1, B1, A2, B2, A3, B3. With tumbling size 3, the first full batch is [A1, B1, A2]; the second is [B2, A3, B3]. These are disjoint. With sliding size 3 and slide 1, the first full window is [A1, B1, A2], then as B2 arrives the oldest A1 expires and the window becomes [B1, A2, B2]. Subsequent windows are [A2, B2, A3] and [B2, A3, B3]. The slide increment controls how often we advance the window, and overlapping windows reuse records in multiple computations. The choice affects when results can be emitted and the work required. Count-based membership depends on record arrivals, unlike time-based membership, which depends on a clock.",
+    "source": "L2 Stream Processing, slides 20–26; Golab & Özsu (2003), §3.1.",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "How would the result change with sliding size 3 and slide 2?",
+      "Can a window be part of the exact desired query semantics?"
+    ],
+    "code": "Arrival order: A1 B1 A2 B2 A3 B3\nWindow size = 3\nSliding window slide = 1"
+  },
+  {
+    "id": "oral-in5040-l02-q03",
+    "type": "explain",
+    "topic": "Lecture 2: Data Stream Processing",
+    "prompt": "Compare processing time and event time. Explain how watermarks help when events arrive late or out of order.",
+    "keyPoints": [
+      "Processing time is measured by the processing operator clock",
+      "Event time comes from when the event occurred",
+      "Late/out-of-order arrivals can change event-time window membership",
+      "Watermarks signal expected progress, not absolute completeness",
+      "There is a trade-off between early results and tolerating late data"
+    ],
+    "modelAnswer": "Processing time is the local clock at the operator when a record is processed; event time is when the real-world event occurred, usually from a timestamp field. Consider a phone that measures at 10:01, 10:02 and 10:03, then uploads everything at 10:10. The events belong to their original minutes with event-time windows, but may all be processed in the 10:10 processing-time minute. Data can also arrive out of timestamp order. A watermark states that the event-time clock has progressed to a threshold under a source’s assumptions, so the engine may close or advance windows. It is not a proof that an earlier-timestamp record cannot arrive. Aggressive watermarks lower output latency but can make more records late; conservative watermarks wait longer. Late-event policies determine how to handle stragglers.",
+    "source": "L2 Stream Processing, slides 28–36; Flink, chapters 2–3 (time semantics/watermarks).",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "Does a watermark sort the stream?",
+      "What if a delayed event belongs to an already-emitted window?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l02-q04",
+    "type": "explain",
+    "topic": "Lecture 2: Data Stream Processing",
+    "prompt": "Why can continuous joins and aggregates require unbounded resources? Compare windows, approximate synopses and exact stateful processing as solutions.",
+    "keyPoints": [
+      "A join or aggregate can depend on past events",
+      "Without limits a stream may contain unbounded relevant history",
+      "Windows bound retained state and define recent-data semantics",
+      "Sampling/sketches/histograms provide approximate answers with error trade-offs",
+      "Exact computation within bounded state or scalable distributed state may be possible under explicit assumptions"
+    ],
+    "modelAnswer": "A filter can process events independently, but a continuous join must remember possible matches from earlier input, and an aggregate needs previously observed information. For an unbounded stream, an exact all-history operation such as an unrestricted join or full sort can demand unbounded memory or never produce a final result. A sliding or tumbling window restricts computation to a finite subset; often that is exactly the intended query, such as errors in the last ten minutes. If the user really needs an all-history quantity and resources are insufficient, sampling, histograms, sketches or other synopses can provide approximate answers with a stated accuracy cost. Modern distributed engines can compute many exact windowed/stateful queries and persist state, but scale-out cannot make an inherently unbounded exact-memory problem disappear without further assumptions.",
+    "source": "L2 Stream Processing, slides 41–49; Babcock et al. (2002), §4 and §6; Golab & Özsu (2003), §§3–4.",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "Is a rolling-window average approximate?",
+      "Why can a random sample miss rare events?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l02-q06",
+    "type": "explain",
+    "topic": "Lecture 2: Data Stream Processing",
+    "prompt": "Explain at-most-once, at-least-once and exactly-once processing guarantees and how checkpoints with replayable input support recovery.",
+    "keyPoints": [
+      "At-most-once can lose events without retries",
+      "At-least-once replays after failure and can duplicate effects",
+      "Exactly-once refers to consistent logical effects on managed state under assumptions",
+      "Checkpoint captures consistent operator state plus input positions",
+      "Recovery restores that state and replays subsequent events",
+      "External side effects require compatible sink/idempotency mechanisms"
+    ],
+    "modelAnswer": "At-most-once processes each event no more than once; crashes may cause loss. At-least-once replays unconfirmed input, so each event can be processed more than once and duplicate effects are possible. Exactly-once state semantics mean that a recovered stateful computation has the same logical effects as processing inputs once, not that the system never re-executes an event. Flink can achieve this by taking consistent distributed checkpoints of operator state together with replayable source positions. After failure it restores a checkpoint and replays the later input, reconstructing the state. Checkpoint barriers coordinate consistent cuts through the distributed operator graph. External outputs, such as emails or nontransactional writes, need transactional sinks, idempotency or other special handling; the internal guarantee alone does not give exactly-once external effects.",
+    "source": "L2 Stream Processing, slides 75–83; Flink, chapters 2–3 (fault tolerance and checkpointing).",
+    "coverage": "slides",
+    "seconds": 240,
+    "followUps": [
+      "What does a checkpoint barrier delimit?",
+      "How does a savepoint differ from automatic checkpoints?"
+    ]
+  }
+]

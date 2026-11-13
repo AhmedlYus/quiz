@@ -1,0 +1,137 @@
+[
+  {
+    "id": "in5040-l07-q01",
+    "question": "A product team needs to compare yearly revenue by city and product category across several operational systems. Which design best matches the workload?",
+    "options": [
+      "Build an integrated historical warehouse with a sales fact and conformed dimensions",
+      "Use only a key-value store addressed by individual order ID",
+      "Use transaction-level locking to ensure every analytical query updates a row",
+      "Issue thousands of row updates directly to the OLTP order database while building the report"
+    ],
+    "answer": 0,
+    "explanation": "A warehouse integrates sources and supports historical, aggregate OLAP queries. OLTP is optimized for short operational transactions rather than broad multidimensional analysis.",
+    "source": "L7 slides 14-20 (OLTP versus OLAP, warehouse characteristics and architecture); Elmasri/Navathe, Overview of Data Warehousing and OLAP, ch. 29.",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q02",
+    "question": "SalesFact stores one row per sold product line. A shipment table stores three shipment rows for an order with two sales lines. Why could joining both tables on order_id and then summing sales revenue be wrong?",
+    "options": [
+      "A star schema never permits joining other fact tables",
+      "Summation is impossible for a relational fact table",
+      "Each sales row may be repeated for every shipment row, multiplying revenue",
+      "A foreign key from the fact table prevents all repeated rows"
+    ],
+    "answer": 2,
+    "explanation": "The join can produce 2 × 3 = 6 rows for that order; each original sale line may be counted three times. Aggregation should respect the facts’ grains, not assume a join preserves measures.",
+    "source": "L7 slides 59-64 and 91-92 (fact schemas, fact constellations and warehouse design).",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q03",
+    "question": "A product dimension contains product, brand and supplier details. Which structural change most clearly makes a star design more snowflake-like?",
+    "options": [
+      "Delete all dimension foreign keys",
+      "Normalize supplier or brand attributes into separate linked dimension tables",
+      "Add a second unrelated measure to the fact table",
+      "Move revenue from SalesFact into Product"
+    ],
+    "answer": 1,
+    "explanation": "Snowflake designs normalize dimension hierarchies into separate tables, reducing redundancy but creating additional joins. Moving measures into dimensions does not define a snowflake.",
+    "source": "L7 slides 59-63 (star, snowflake and constellation examples); Elmasri/Navathe, Overview of Data Warehousing and OLAP, ch. 29.",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q04",
+    "question": "A data cube has exactly three independent dimensions and no additional hierarchy levels. How many distinct GROUP BY subsets (cuboids) does its full CUBE contain, including the apex and base?",
+    "options": [
+      "9",
+      "3",
+      "6",
+      "8"
+    ],
+    "answer": 3,
+    "explanation": "Each dimension is either included or aggregated away, giving 2^3 = 8 subsets. Three dimensions does not imply only three cuboids; the empty subset is the grand-total apex.",
+    "source": "L7 slides 74-82 (multidimensional data and cuboid lattice).",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q05",
+    "question": "A report changes from sales by (product, country, month) to sales by (product, country, year). Which OLAP operation occurred?",
+    "options": [
+      "Roll-up along time",
+      "Pivot of row and column axes",
+      "Slice on a fixed product",
+      "Drill-down along time"
+    ],
+    "answer": 0,
+    "explanation": "Month → year moves upward in the time hierarchy, reducing detail: roll-up. Drill-down goes in the opposite direction; pivot only reorients displayed axes.",
+    "source": "L7 slides 71-72 and 84-87 (hierarchies, roll-up and drill-down).",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q07",
+    "question": "An analyst fixes city = Oslo and then restricts month to January or February and product to A or B. Which descriptions apply?",
+    "options": [
+      "Only a drill-down, because detail is increased",
+      "A slice on city combined with a dice over selected month and product values",
+      "A roll-up, because at least one dimension is fixed",
+      "Only a pivot, because the cube is rotated"
+    ],
+    "answer": 1,
+    "explanation": "Slice selects one dimension value; dice selects a subcube over ranges/sets in multiple dimensions. Neither is the same as reorienting axes (pivot).",
+    "source": "L7 slides 84-89 (OLAP slice, dice, roll-up, drill-down and pivot).",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q11",
+    "question": "According to Chai et al., which sequence most accurately allocates work across the ML data-management lifecycle?",
+    "options": [
+      "Pre-ML = serving; in-ML = deleting data; post-ML = feature cleaning",
+      "Pre-ML = discovery/cleaning/labeling; in-ML = features/training acceleration; post-ML = model storage/serving/debugging",
+      "Pre-ML = only GPU training; in-ML = only database backup; post-ML = only visualization",
+      "Data management ends when preprocessing is complete"
+    ],
+    "answer": 1,
+    "explanation": "The survey distinguishes preparing high-quality data, accelerating training/inference, and managing deployed models and pipelines. It explicitly treats post-training data/artifact management as part of the problem.",
+    "source": "L7 slides 4-8; Chai et al. (2023), Data Management for Machine Learning: A Survey, §§1-4.",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l07-q12",
+    "question": "In five baskets, X appears in four baskets, Y in three, and both X and Y in two. What are the support and confidence of X ⇒ Y?",
+    "options": [
+      "Support 2/4; confidence 2/5",
+      "Support 3/5; confidence 2/3",
+      "Support 4/5; confidence 3/5",
+      "Support 2/5; confidence 2/4"
+    ],
+    "answer": 3,
+    "explanation": "Support counts baskets containing both items divided by all baskets: 2/5 = 0.4. Confidence conditions on X appearing: 2/4 = 0.5. These measure co-occurrence, not causation.",
+    "source": "Elmasri/Navathe, Data Mining Concepts, §28.2.1, printed pp. 1073-1075; Garcia-Molina/Ullman/Widom, Data Mining §20.6.",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "pensum"
+  },
+  {
+    "id": "in5040-l07-q13",
+    "question": "When Apriori discovers that itemset {A,B} is below the minimum support threshold, what can it safely infer?",
+    "options": [
+      "Every superset containing {A,B} is also below minimum support",
+      "Every subset of {A,B} is below minimum support",
+      "The confidence of A ⇒ B must be 100%",
+      "All other itemsets can be discarded"
+    ],
+    "answer": 0,
+    "explanation": "Support is anti-monotone under addition of items: a superset cannot occur in more baskets than {A,B}. Pruning supersets is safe, while its subsets can still be frequent.",
+    "source": "Elmasri/Navathe, Data Mining Concepts, §28.2.2 (Apriori), printed pp. 1075-1076.",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "coverage": "pensum"
+  }
+]

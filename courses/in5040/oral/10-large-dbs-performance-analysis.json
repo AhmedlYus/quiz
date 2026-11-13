@@ -1,0 +1,99 @@
+[
+  {
+    "id": "oral-in5040-l10-q01",
+    "type": "walkthrough",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "prompt": "A million-row table holds approximately 100 rows per data page. Compare an index lookup for ten qualifying rows with a sequential scan for 400,000 scattered qualifying rows. What would you check in an execution plan?",
+    "keyPoints": [
+      "Estimate 10,000 data pages and distinguish selective from low-selectivity predicates.",
+      "Explain index traversal plus possible random heap-page fetches.",
+      "Explain why a sequential scan may outperform index fetches when a large fraction qualifies.",
+      "Inspect estimates versus actual rows and I/O/caching or timing, not just operator names.",
+      "State index maintenance and clustering as relevant trade-offs."
+    ],
+    "modelAnswer": "One million rows divided by about 100 rows per page gives roughly 10,000 data pages. If only ten rows qualify, a B-tree lookup plus about ten random heap-page fetches may be cheaper than reading all 10,000 pages. If 400,000 scattered rows qualify, following an index to many heap pages can be much more expensive than sequentially scanning the table; caching and clustering change the cost. I would examine the plan’s estimated and actual row counts, access method, page I/O and timing, plus whether a covering index avoids heap visits. I would not conclude every sequential scan is bad or add indexes without considering storage and update-maintenance cost.",
+    "source": "L10 slides 11-20 (index and scan trade-offs), 21-32 (query plans); applied calculation.",
+    "coverage": "slides",
+    "seconds": 240,
+    "hints": [
+      "Start by estimating how many pages the table occupies.",
+      "How many random heap-page fetches might the index need?"
+    ],
+    "followUps": [
+      "When can an index-only scan avoid fetching heap pages?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l10-q02",
+    "type": "explain",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "prompt": "Explain how a relational optimizer decides a physical query plan. Compare index nested-loop, hash join and sort-merge join, and explain how early filtering affects the plan.",
+    "keyPoints": [
+      "SQL is declarative; optimizer estimates costs from cardinalities, selectivity and statistics.",
+      "Predicate/projection pushdown reduces intermediate rows and data transfer.",
+      "Indexed nested-loop favors small outer input and indexed inner join lookups.",
+      "Hash join suits many equijoins but needs build-side memory and possibly spill.",
+      "Sort-merge benefits from sorted inputs or can pay sorting cost.",
+      "Verify plan estimates and runtime measurements before tuning."
+    ],
+    "modelAnswer": "SQL expresses the result, while the optimizer chooses scans, filters, join order and physical join algorithms using statistics and estimated selectivities. Filtering and projecting early can reduce intermediate results dramatically. An index nested-loop join is often effective with a small filtered outer relation and an index on the inner join key. A hash join builds a hash structure on one side and probes with the other, useful for large equijoins but sensitive to memory and spills. Sort-merge can be effective when inputs are already ordered or when ordering is also needed, otherwise sorting adds cost. I would compare estimates with EXPLAIN ANALYZE actual rows, timing and I/O before changing SQL or indexes.",
+    "source": "L10 slides 21-32 (efficient SQL and query strategies); Elmasri/Navathe, Algorithms for Query Processing and Optimization (reading theme; full chapter not supplied).",
+    "coverage": "slides",
+    "seconds": 250,
+    "hints": [
+      "Which cost estimates depend on statistics?",
+      "Think about the different data structures used by each join."
+    ],
+    "followUps": [
+      "What happens if the optimizer estimates 100 rows but processes 900,000?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l10-q03",
+    "type": "walkthrough",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "prompt": "An application loads 1,000 customers, then executes one query per customer to fetch orders. Network RTT is 5 ms for each serialized request. Diagnose the problem and propose a safer SQL/application redesign.",
+    "keyPoints": [
+      "Identify the N+1 query pattern: one parent query followed by 1,000 child queries.",
+      "Compute approximately 5 seconds of RTT waiting for the child queries alone.",
+      "Suggest batched fetching, set-based joins or selective eager loading rather than one query per row.",
+      "Discuss limiting transferred columns/rows and comparing actual execution plans.",
+      "Preserve parameterized queries and correctness rather than blindly merging all data."
+    ],
+    "modelAnswer": "The application performs the N+1 pattern: one query for customers and 1,000 additional queries for orders. With serialized 5 ms round trips, the child requests alone have at least 1,000 × 0.005 = 5 seconds of network waiting before database processing. I would fetch orders for the customer ID set in batches, use an appropriately indexed JOIN, or use the ORM’s eager-loading facility while keeping result sizes under control. I would select only necessary columns, inspect the execution plan, and keep values parameterized. The redesign should preserve the intended grouping and avoid accidental row multiplication or huge response payloads.",
+    "source": "L10 slides 21-32 (SQL efficiency and application design); applied latency scenario.",
+    "coverage": "slides",
+    "seconds": 210,
+    "hints": [
+      "Count how many network requests are made.",
+      "How could one SELECT handle multiple customer IDs?"
+    ],
+    "followUps": [
+      "Why might a single huge JOIN still be the wrong choice for pagination?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l10-q05",
+    "type": "walkthrough",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "prompt": "Explain a parallel hash-partitioned equijoin of Orders(customer_id, ...) with Customers(id, ...). Contrast pipelining with blocking operators and identify a scalability hazard.",
+    "keyPoints": [
+      "Partition Orders.customer_id and Customers.id with compatible hashing to co-locate matching keys.",
+      "Workers build/probe or otherwise join local partitions; exchange/shuffle has network cost.",
+      "Iterator-style Open/Next/Close supports pipelined operators without full intermediate materialization.",
+      "A full sort is a blocking operator that needs substantial input before producing output.",
+      "Skew/hot keys, memory pressure and stragglers limit parallel speed-up."
+    ],
+    "modelAnswer": "For a parallel equijoin, I would distribute Orders rows using hash(customer_id) and Customers rows using the same compatible hash on id so matching keys reach the same worker. Each worker can then process a local equijoin, for example by building and probing a hash table, although the initial repartitioning requires network exchange. In a pull-based iterator model, Open initializes an operator, Next yields tuples and Close releases resources, permitting pipelining between operators without writing every intermediate table. A full sort can block because it needs many or all input rows before returning sorted output. Parallelism is not free: network transfer, memory spills and especially a hot key producing a skewed partition can make one worker dominate the completion time.",
+    "source": "Elmasri/Navathe, Algorithms for Query Processing and Optimization, §18.8, printed pp. 683-687 (parallel operators and pipelining); L10 slides 21-32 (query efficiency).",
+    "coverage": "pensum",
+    "seconds": 250,
+    "hints": [
+      "Which key should each input hash?",
+      "Which operations need to inspect a large amount of input before yielding results?"
+    ],
+    "followUps": [
+      "What changes if 80% of Orders belongs to one customer?"
+    ]
+  }
+]

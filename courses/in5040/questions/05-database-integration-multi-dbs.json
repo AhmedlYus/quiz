@@ -1,0 +1,107 @@
+[
+  {
+    "id": "in5040-l05-q01",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "Materialized ETL warehouse; no source calls during refresh",
+      "Logical integration using a mediated GCS; runtime dependency on source access and query translation",
+      "Full replication at every site; no synchronization needed",
+      "XML export alone; semantic mappings become unnecessary"
+    ],
+    "explanation": "Logical integration exposes a virtual GCS and obtains data from source DBMSs when queries run. It avoids copying everything but depends on remote latency, source availability, mappings, and wrapper capabilities. A warehouse instead materializes integrated records and usually has refresh lag.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 2-3; Özsu & Valduriez (2020), Ch.7 §7.1",
+    "question": "A university needs current data from independently managed research databases without duplicating all records. Which integration approach best fits the requirement, and what is its principal operational cost?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l05-q02",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "The local database’s unrelated client application",
+      "The fragmentation catalogue of a single homogeneous distributed DBMS",
+      "A wrapper, translating queries, export-schema names and result types",
+      "A 2PC coordinator, which changes SQL syntax automatically"
+    ],
+    "explanation": "Wrappers expose source capabilities, translate mediated operations into local interfaces, and normalize returned results. The mediator makes global planning decisions; the commit coordinator does not translate schemas or query syntax.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 10-12,40; Özsu & Valduriez (2020), Ch.7 §7.2",
+    "question": "A federated query is decomposed into local subqueries, but Source B uses a different query dialect and returns differently typed identifiers. Which component should adapt B to the mediator?",
+    "answer": 2
+  },
+  {
+    "id": "in5040-l05-q03",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "Assume the two IDs identify one entity because the number matches",
+      "Run schema matching, then verify identifier semantics and define explicit normalization/entity mappings",
+      "Use 2PC to determine whether two IDs refer to the same customer",
+      "Copy both tables into one warehouse; this automatically resolves duplicate identities"
+    ],
+    "explanation": "Matching identifies a possible correspondence, but the same displayed ID need not denote the same real-world entity. Domain semantics, namespace, key uniqueness and entity-resolution rules must be checked; schema mapping then specifies valid transformations. Neither 2PC nor physical copying establishes identity.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 13-20; Özsu & Valduriez (2020), Ch.7 §7.1.2",
+    "question": "A CRM stores client_id as \"0012\" and an ERP stores buyer_id as 12. An engineer observes the matching numbers and wants to merge the records. What must be done first?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l05-q04",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "LAV, because every local source is defined in terms of GCS",
+      "2PL, because the definition spans two DBMSs",
+      "GAV, because a global relation is defined as a view over local source relations",
+      "A data lake schema-on-read rule"
+    ],
+    "explanation": "In global-as-view (GAV), global schema elements are defined through queries over local sources, so global queries can often be unfolded. LAV reverses the definition direction by describing local sources as views over an independently defined global schema.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 15-17; Özsu & Valduriez (2020), Ch.7 §7.1.1",
+    "question": "A federation defines GlobalCustomer as a view over normalized CRM_Customer and ERP_Buyer source relations. What mapping design is this?",
+    "answer": 2
+  },
+  {
+    "id": "in5040-l05-q05",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "The system can infer every missing city from the GCS declaration",
+      "Global query rewriting may use available views, but cannot guarantee complete results without a source covering every requested customer",
+      "LAV always materializes one global warehouse",
+      "Every source must use the same physical DBMS for LAV to function"
+    ],
+    "explanation": "LAV mappings describe what each local source contributes relative to the GCS. A schema definition does not create missing tuples, so a rewriting limited to Oslo and Bergen views cannot guarantee all Norwegian customers are returned.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 15-17; Özsu & Valduriez (2020), Ch.7 §7.1.1",
+    "question": "A LAV integration has a broad GlobalCustomer schema, but available local views contain only Oslo and Bergen customers. A user asks for all Norwegian customers. What is the principal limitation?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l05-q07",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "Fetch all CRM rows first and filter at the mediator",
+      "Push city = \"Oslo\" to CRM, project needed columns and ship only matching rows for the cross-source join",
+      "Convert both systems to RDF to avoid all joins",
+      "Ignore the source-side filter because query localization is only a homogeneous-DBMS concern"
+    ],
+    "explanation": "Source-side selection and projection can reduce transferred CRM rows from one million to about 100 and limit intermediate volume. This is a cost optimization, not a guarantee of global optimality if source indexes, latency or join selectivity differ.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 34-36",
+    "question": "CRM has one million customers, but only 100 satisfy city = \"Oslo\". Invoice data are in another DBMS. Which plan is usually preferable when CRM can evaluate the predicate efficiently?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l05-q09",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "options": [
+      "The shared GCS automatically guarantees atomic updates across both sources",
+      "Globally atomic updates cannot be assumed; source autonomy and incompatible transaction APIs limit coordinated commit",
+      "Query unfolding is enough to implement distributed ACID without local support",
+      "Every read-only federated query must be aborted"
+    ],
+    "explanation": "A mediated schema and wrapper are not substitutes for participation in a global transaction protocol. Without appropriate coordination support, the federation cannot safely promise atomic all-or-nothing writes across autonomous sources, though read federation can still be useful.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 12,41; Özsu & Valduriez (2020), Ch.7 §7.1",
+    "question": "Two autonomous local DBMSs can answer reads but one refuses to participate in a global prepare/commit protocol. What should the mediator conclude about cross-source updates?",
+    "answer": 1
+  }
+]

@@ -74,8 +74,9 @@ courses/
   in5040/
     course.json   settings, lectures, which modes are on, oral options
     questions/    quiz questions (multiple choice)
-    oral/         oral questions (used when "modes" has "oral" or "query" on; query practice
-                  is a round of only the write-a-query questions, typed in the code editor)
+    oral/         spoken oral questions (used when "modes" has "oral" on)
+    query/        write-a-query questions, typed in the code editor (the "query" mode; shown in
+                  oral mode instead when "query" is off)
     prompts/      GPT templates for writing questions and grading (not used by the app)
 ```
 
@@ -87,7 +88,8 @@ Oral mode is optional. Its course-specific settings live under `"oral"` in `cour
 
 - `speech.terms`: words speech-to-text should listen for; `speech.fixes`: `["pattern", "replacement"]`
   pairs that correct common mishearings (for example `"\\bno[\\s-]?sequel\\b"` to `"NoSQL"`).
-- `query`: turns on write-a-query questions (`"type": "query"`) with a code editor: `language`,
+- `query`: turns on write-a-query questions (files in `query/`, see
+  `schemas/query-question.schema.json`) with a code editor: `language`,
   `label`, `placeholder`, `grading` (what GPT should check), and `keywords`, `operators` and
   `views` (a pattern) for highlighting. Without it, query questions are rejected by `npm run check`.
 - `exam`: `questions` and a short `note` describing the real exam.

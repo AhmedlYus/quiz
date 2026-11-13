@@ -1,0 +1,97 @@
+[
+  {
+    "id": "oral-in5040-l06-q01",
+    "type": "walkthrough",
+    "topic": "Lecture 6: Web Data Management",
+    "prompt": "Explain the hyperlink graph and the search-engine pipeline from crawling to ranking. What distinguishes keyword retrieval, structured Web querying and question answering, and why can hidden-Web content be missed?",
+    "keyPoints": [
+      "Models Web pages and directed hyperlinks, explaining SCC/IN/OUT reachability at a high level.",
+      "Traces crawler frontier, incremental/focused/parallel crawling and index construction.",
+      "Explains inverted text indexes, query retrieval and ranking.",
+      "Distinguishes keyword document ranking, structured link/document queries and answer extraction.",
+      "Explains why dynamic, form-driven hidden-Web content may not be discovered by ordinary link crawling."
+    ],
+    "modelAnswer": "I can model the Web as a directed graph whose vertices are pages and edges are hyperlinks. The large-scale bow-tie picture distinguishes a strongly connected core, pages that can lead into it, and pages reachable from it. A crawler starts with seed URLs and manages a frontier of links, prioritizing pages and revisiting them as they change; focused and parallel crawlers address topic selection and throughput. The indexer builds inverted term-to-document indexes and often link indexes. A query engine retrieves matching documents and a ranking stage orders them. Keyword search generally returns ranked documents, while structured Web queries use document/link structure, and question answering tries to extract a specific answer from candidate documents. The process is never exhaustive: the Web changes continuously, and form-driven hidden data may require generated queries rather than ordinary link following.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 3–22; Özsu & Valduriez (2020), Ch. 12 §§12.1–12.5.",
+    "followUps": [
+      "What does an inverted index store, and how is it different from a hyperlink index?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Start with page links, then explain retrieval, indexing and information extraction."
+    ]
+  },
+  {
+    "id": "oral-in5040-l06-q02",
+    "type": "explain",
+    "topic": "Lecture 6: Web Data Management",
+    "prompt": "A service exchanges nested XML documents. Explain XML structure and query navigation, and compare shredding into a relational DBMS with native XML storage.",
+    "keyPoints": [
+      "Describes the ordered nested XML tree, elements/attributes and well-formedness.",
+      "Uses an XML path example and XPath/XQuery for document navigation.",
+      "Explains XML shredding and relational XML publishing/composing.",
+      "Describes relational indexing/SQL benefits and reconstruction costs, including order.",
+      "Explains when native XML storage better fits irregular document-centric content."
+    ],
+    "modelAnswer": "XML represents nested ordered elements with attributes and text. For instance a catalog can have repeated book elements, each with a title; a well-formed document needs properly nested tags and a single root. XPath can select /catalog/book/title, while XQuery supports richer transformations. An XML-enabled relational DBMS may shred incoming documents into tables, preserving identifiers and enough structure to reconstruct hierarchy and order. It can reuse SQL, indexing and transaction tools, but assembling complex documents may involve many joins or mapping rules. Publishing works the other way, constructing XML from relational data. A native XML DBMS treats complete XML documents and their tree structure as first-class data, which is attractive for irregular, document-centric queries. I would choose based on structure, updates, querying and exchange needs rather than assuming one is always faster.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 23–33; Özsu & Valduriez (2020), Ch. 12 §12.6.2 (XPath/XQuery and XML mapping).",
+    "followUps": [
+      "What is lost if XML sibling order is discarded during shredding?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Distinguish preserving a document tree from storing its elements in tables."
+    ]
+  },
+  {
+    "id": "oral-in5040-l06-q03",
+    "type": "compare",
+    "topic": "Lecture 6: Web Data Management",
+    "prompt": "Represent a student linked to a university in RDF, write the corresponding SPARQL graph pattern, and compare RDF to XML and relational tables.",
+    "keyPoints": [
+      "Defines RDF subject–predicate–object triples with resource identifiers and literals.",
+      "Creates at least two valid related triples, forming a labeled directed graph.",
+      "Uses a correct SPARQL basic graph pattern with a variable and shared identifier.",
+      "Mentions RDFS vocabulary semantics where relevant.",
+      "Contrasts RDF graph relationships with ordered XML documents and typed relational tables."
+    ],
+    "modelAnswer": "In RDF I would use triples like (urn:student:7, urn:studiesAt, urn:uio) and (urn:student:7, urn:name, 'Ada'). They describe two directed labeled edges from the student resource, one toward a university IRI and one toward a literal name. A SPARQL pattern such as SELECT ?s WHERE { ?s <urn:studiesAt> <urn:uio> . } returns resources studying at that university; shared variables across multiple patterns express joins. RDFS adds vocabulary relations such as subclasses and domain/range information, rather than a complete application constraint system. XML would naturally store an ordered nested student document, while RDF is designed to link statements about separately identified resources across datasets. Relational tables work well for typed tabular data. None of these logical models dictates a unique physical storage design.",
+    "coverage": "slides",
+    "source": "Lecture 6, slides 34–42; Özsu & Valduriez (2020), Ch. 12 §12.6.2.",
+    "code": "(urn:student:7, urn:studiesAt, urn:uio)\n(urn:student:7, urn:name, \"Ada\")",
+    "followUps": [
+      "How would you extend the SPARQL query to also retrieve the student’s name?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Model facts as directed labeled edges and then describe a matching graph pattern."
+    ]
+  },
+  {
+    "id": "oral-in5040-l06-ass2-2025-web-exchange",
+    "type": "compare",
+    "topic": "Lecture 6: Web Data Management",
+    "prompt": "A Web application needs to exchange nested records with another service and then combine those records with RDF facts from a separate provider. Explain the distinction between Web data search, data exchange and data integration. Compare the roles of XML and RDF and identify the main interoperability problems.",
+    "keyPoints": [
+      "Distinguishes finding/retrieving information (search and querying) from serializing/transmitting data between systems (exchange).",
+      "Explains XML as a tree-structured document representation with well-formedness, nesting and possible schemas.",
+      "Explains RDF as subject–predicate–object facts forming a graph and suitable for linking identified resources.",
+      "Explains integration requires schema/vocabulary mapping, identifier reconciliation and conflict handling beyond agreeing on a file format.",
+      "Discusses source access, query/transport interfaces, provenance and data freshness as practical Web data-management concerns."
+    ],
+    "modelAnswer": "Web search and querying locate or retrieve information, for instance through a crawler and text index or a structured query interface. Data exchange concerns representing information in a form that another application can transmit and interpret. XML is useful for exchanging structured, nested documents with elements, attributes and potentially an XML schema. RDF instead expresses facts as triples with identifiers that can connect information from different sources into a graph. Neither syntax solves semantic integration by itself. When combining a customer record with RDF facts, I still need to decide which identifiers refer to the same entity, align predicates with local fields, handle inconsistent values and preserve provenance. Search and exchange get the data to the right place; integration makes the combined data meaningful and queryable.",
+    "seconds": 240,
+    "hints": [
+      "Search, exchange and integration solve three different problems.",
+      "Does the same XML syntax guarantee two organizations use the same customer identifiers?"
+    ],
+    "followUps": [
+      "When would XML document hierarchy be more natural than an RDF statement graph?",
+      "What role could a mediator or wrapper from L5 play?"
+    ],
+    "source": "IN5040 H2025 Assignment 2, Question 6(a–c); L6 Web Data Management slides 23–42 (XML, RDF and Web querying); L6 Notion study notes.",
+    "coverage": "slides"
+  }
+]

@@ -1,0 +1,206 @@
+[
+  {
+    "id": "oral-in5040-l03-ass1-2026-q01",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q1: Write an EPL query on the JFK stream returning the date/timestamp, average, minimum and maximum temperatures for days when the average temperature is strictly greater than 85°F. Preserve the specified four-column output.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.",
+    "keyPoints": [
+      "Use the assignment's jfk stream, not the Java class name WeatherTuple.",
+      "Filter averageTemperature strictly above 85, not maximumTemperature.",
+      "Project timestamp and exactly the three specified temperature fields."
+    ],
+    "modelAnswer": "select timestamp, averageTemperature, minimumTemperature, maximumTemperature\nfrom jfk(averageTemperature > 85)",
+    "hints": [
+      "Start with SELECT and FROM on the registered jfk stream."
+    ],
+    "followUps": [
+      "Would changing > to >= alter the results?",
+      "Why is filtering on maximumTemperature incorrect for this task?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 3, Question 1; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q02-sliding",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q2, part A: Find complete *overlapping* seven-report windows at JFK with mean averageTemperature strictly above 82°F. Return Start_date (oldest report timestamp), End_date (newest report timestamp), and Temp (seven-report mean). Ignore incomplete initial windows. The assignment assumes one report per day.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.",
+    "keyPoints": [
+      "Use #length(7) to retain a rolling seven-report count window.",
+      "Use a position-from-tail function for oldest window timestamp and zero-th previous for latest.",
+      "Require seven records so the initial partial window is excluded.",
+      "Filter the window mean with HAVING, not an event-by-event WHERE filter.",
+      "Return the requested three named result columns."
+    ],
+    "modelAnswer": "select prevtail(0, timestamp) as Start_date,\n       prev(0, timestamp) as End_date,\n       avg(averageTemperature) as Temp\nfrom jfk#length(7)\nhaving count(*) = 7 and avg(averageTemperature) > 82",
+    "hints": [
+      "The first view is the rolling count view, not a batch view.",
+      "Consider prevtail(0, ...) for the first entry retained by the window."
+    ],
+    "followUps": [
+      "Why is a #time(7 days) engine-time window not an adequate replacement during fast CSV replay?",
+      "What happens to the maximum observed mean if windows overlap?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 3, Question 2; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q02-tumbling",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q2, part B: Repeat the JFK seven-day mean-above-82°F query with a non-overlapping seven-report *tumbling batch* window. Return Start_date, End_date and Temp for completed qualifying batches only.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.",
+    "keyPoints": [
+      "Use #length_batch(7), not #length(7) for consecutive non-overlapping groups.",
+      "Compute the average across the full emitted batch, not per input event.",
+      "Preserve the first and last batch timestamps.",
+      "Apply the strict 82 threshold to the batch average.",
+      "Return Start_date, End_date and Temp."
+    ],
+    "modelAnswer": "select prevtail(0, timestamp) as Start_date,\n       prev(0, timestamp) as End_date,\n       avg(averageTemperature) as Temp\nfrom jfk#length_batch(7)\nhaving avg(averageTemperature) > 82",
+    "hints": [
+      "The batch should emit only after collecting seven reports."
+    ],
+    "followUps": [
+      "Why can the rolling-window query find a higher maximum than a tumbling-window query?",
+      "If the assignment has 1 report/day, what does a batch of seven events mean?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 3, Question 2; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q03",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q3: Find completed non-overlapping seven-day San Francisco windows having a *total precipitation of at least 3 inches*, based on each record's external timestamp (not Esper wall-clock time). Return Week_start, Week_end and Precipitation (total). Week 1 is the first seven daily reports, week 2 the next seven, etc.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.",
+    "keyPoints": [
+      "Use san_francisco stream and externally timed batch semantics.",
+      "Window by timestamp over non-overlapping seven-day intervals.",
+      "Use sum(precipitation) to measure total inches, not count of rainy days.",
+      "Use >= 3, not > 3.",
+      "Return the requested week boundary fields and total precipitation."
+    ],
+    "modelAnswer": "select prevtail(0, timestamp) as Week_start,\n       prev(0, timestamp) as Week_end,\n       sum(precipitation) as Precipitation\nfrom san_francisco#ext_timed_batch(timestamp, 7 days)\nhaving sum(precipitation) >= 3",
+    "hints": [
+      "The assignment explicitly says external timestamp and weeks 1–7, 8–14.",
+      "Consider #ext_timed_batch rather than a #time_batch based on runtime time."
+    ],
+    "followUps": [
+      "How does #ext_timed_batch differ from #ext_timed?",
+      "Why does an event-time view matter when simulating 2014–2018 at accelerated speed?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 3–4, Question 3; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q04",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q4: Identify each complete three-consecutive-report period in San Francisco with *mean* wind speed greater than 19 mph and recorded rainfall on at least one of the three days. Rain is not required on every day. Return Start_date, End_date, Wind (mean), Precipitation (three-day total).",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.",
+    "keyPoints": [
+      "Use the San Francisco stream and the sliding length-three count window.",
+      "Ensure the window contains three reports.",
+      "Test average wind speed > 19 over the whole window.",
+      "Require rain on *any* day, not all three.",
+      "Project window boundary timestamps, mean wind and total rain."
+    ],
+    "modelAnswer": "select prevtail(0, timestamp) as Start_date,\n       prev(0, timestamp) as End_date,\n       avg(averageWindSpeed) as Wind,\n       sum(precipitation) as Precipitation\nfrom san_francisco#length(3)\nhaving count(*) = 3\n   and avg(averageWindSpeed) > 19\n   and max(precipitation) > 0",
+    "hints": [
+      "Use a rolling three-record window for overlapping three-day periods.",
+      "Do not filter out dry days before you compute the wind average."
+    ],
+    "followUps": [
+      "Why would WHERE precipitation > 0 before the window be wrong?",
+      "What would change if the question said it rains on all three days?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 4, Question 4; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q06",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q6: Detect a pair of JFK daily reports, in arrival order, whose average temperatures differ by *at least 40°F*, with their event timestamps no more than seven days apart. Return First_date, Second_date, Temp1, Temp2 and Temp_difference (absolute). Match each qualifying first report with its next qualifying later report.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.",
+    "keyPoints": [
+      "Use a two-event followed-by CEP pattern in the JFK stream.",
+      "Start an instance for every first-day event.",
+      "Compare temperatures with absolute difference >= 40.",
+      "Use the *event timestamps* for the <= 7-day constraint (604800000 ms), not a processing-time timer guard.",
+      "Project dates, two temperatures and absolute difference."
+    ],
+    "modelAnswer": "select a.timestamp as First_date,\n       b.timestamp as Second_date,\n       a.averageTemperature as Temp1,\n       b.averageTemperature as Temp2,\n       Math.abs(b.averageTemperature - a.averageTemperature) as Temp_difference\nfrom pattern [every a=jfk -> b=jfk(\n       Math.abs(averageTemperature - a.averageTemperature) >= 40\n       and timestamp > a.timestamp\n       and timestamp - a.timestamp <= 604800000L)]",
+    "hints": [
+      "Bind a to the first daily report and b to a later one.",
+      "Compare long timestamp values and remember seven days is 604800000 milliseconds."
+    ],
+    "followUps": [
+      "How do you avoid treating a timer:within(7 days) guard as a constraint on historical weather dates?",
+      "Would a pattern with every before the second event report multiple qualifying second days?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 4–5, Question 6; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q07",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q7: Detect three consecutive JFK daily reports where wind speed rises by at least 5 mph from day 1 to 2 and day 2 to 3, and precipitation strictly increases at each step. Return Start_date, Stop_date, Wind_1, Wind_2, Wind_3. Use a row-sequence pattern that does not skip intervening records.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.\nFor Q7, one daily report is present for each calendar day; the contiguous input rows represent consecutive dates. If days could be missing, additional calendar-date checks would be necessary.",
+    "keyPoints": [
+      "Use three adjacent sequence positions A B C (match_recognize) rather than unrestricted followed-by events that may skip days.",
+      "Require each of the two wind increases >= 5 mph.",
+      "Require precipitation to rise strictly at both transitions.",
+      "Output the first and third timestamps and all three wind speeds.",
+      "Allow overlap in candidate starting positions by skipping only to the next row after a match."
+    ],
+    "modelAnswer": "select *\nfrom jfk\nmatch_recognize (\n  measures A.timestamp as Start_date,\n           C.timestamp as Stop_date,\n           A.averageWindSpeed as Wind_1,\n           B.averageWindSpeed as Wind_2,\n           C.averageWindSpeed as Wind_3\n  after match skip to next row\n  pattern (A B C)\n  define B as B.averageWindSpeed >= A.averageWindSpeed + 5\n              and B.precipitation > A.precipitation,\n         C as C.averageWindSpeed >= B.averageWindSpeed + 5\n              and C.precipitation > B.precipitation\n)",
+    "hints": [
+      "A row-recognition pattern (A B C) is a natural way to describe three consecutive observations."
+    ],
+    "followUps": [
+      "Why might three -> atoms without adjacency constraints match nonconsecutive days?",
+      "What additional checks would you need if the weather CSV had missing days?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 5, Question 7; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-q08",
+    "type": "query",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Q8: Match aligned seven-report (non-overlapping) weeks from JFK and San Francisco. Return Week_start, Week_end and Temperature_difference for weeks where San Francisco's weekly mean temperature exceeds JFK's by *more than 35°F*, JFK has rain on at least one day, and San Francisco has no rain on any day. Use a bounded week-by-week join.",
+    "code": "Assignment 1 (IN5040 H2026), Esper 8.2. The registered weather event streams are jfk and san_francisco.\nEach daily WeatherTuple report has: timestamp, weatherStation, stationName, averageTemperature, minimumTemperature, maximumTemperature, averageWindSpeed, precipitation, weather.\nASSUMPTIONS FOR THESE MODEL ANSWERS: timestamp is a long epoch-millisecond value; each source emits exactly one report per UTC day in ascending timestamp order; precipitation is nonnegative and measured in inches; temperatures are in degrees Fahrenheit; wind speed is mph. For Q8, corresponding days have the same timestamp. These assumptions are stated because the PDF does not give Java field types or CSV values.\nFor Q8, the model assumes corresponding daily JFK and San Francisco records have exactly equal UTC timestamps. The assignment does not provide the CSV contents; if timestamps differ by time zone or clock, daily alignment needs normalization. The two seven-record batch views need the expected parallel update timing, as noted in the assignment.",
+    "keyPoints": [
+      "Use both registered station streams, each with a seven-report tumbling batch.",
+      "Align daily tuples by timestamp; do not compute a cross product of unrelated dates.",
+      "Require all seven corresponding days to be present.",
+      "Compute the difference of the station-specific weekly mean temperatures in the correct direction (> 35).",
+      "Require at least one rainy JFK day and zero rainy SFO days.",
+      "Return the three named week-level result columns."
+    ],
+    "modelAnswer": "select min(j.timestamp) as Week_start,\n       max(j.timestamp) as Week_end,\n       avg(s.averageTemperature) - avg(j.averageTemperature) as Temperature_difference\nfrom jfk#length_batch(7) as j,\n     san_francisco#length_batch(7) as s\nwhere j.timestamp = s.timestamp\nhaving count(*) = 7\n   and avg(s.averageTemperature) - avg(j.averageTemperature) > 35\n   and max(j.precipitation) > 0\n   and max(s.precipitation) = 0",
+    "hints": [
+      "Two #length_batch(7) windows define the week boundaries.",
+      "Use timestamp equality so one JFK day joins only with the same San Francisco day."
+    ],
+    "followUps": [
+      "Why is filtering out dry SFO records before computing the weekly average incorrect?",
+      "Why does the assignment specifically warn about removing Thread.sleep() for this two-stream query?"
+    ],
+    "alternatives": [],
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 5, Question 8; Esper 8.2 EPL reference (https://esper.espertech.com/release-8.2.0/reference-esper/html/).",
+    "coverage": "pensum"
+  }
+]

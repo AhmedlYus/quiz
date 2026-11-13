@@ -1,0 +1,122 @@
+[
+  {
+    "id": "in5040-l04-q01",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "Both, because clients contact databases over a network",
+      "Only the single-server system, because it centralizes query execution",
+      "The fragmented, logically integrated database across sites; a remote client/server setup alone is not enough",
+      "Neither, unless every table is fully replicated"
+    ],
+    "explanation": "Distributed database management concerns logically related data managed across multiple sites, not merely a database reached remotely by an application. Full replication is not a prerequisite; partitioning across sites also qualifies.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 2-6; Özsu & Valduriez (2020), Ch.1 §1.1",
+    "question": "A company runs one PostgreSQL server on a separate machine from its application. Another company stores fragments of a logically unified database at two independent sites. Which is clearly a distributed database system?",
+    "answer": 2
+  },
+  {
+    "id": "in5040-l04-q02",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "UNION ALL A and B, because the fragments contain different rows",
+      "JOIN A and B on id, assuming id uniquely identifies the same customer in both fragments",
+      "JOIN A and B on row number, assuming the scan orders are stable",
+      "Keep only A, because email is a non-key attribute"
+    ],
+    "explanation": "Vertical fragmentation separates attributes, not tuples. Retaining the reconstruction key in each fragment permits a lossless join on id. Scans do not guarantee stable row order; UNION is for horizontal fragments. The reconstruction guarantee is developed in Ch. 2 §2.1.",
+    "coverage": "pensum",
+    "source": "Lecture 4, slide 22 (vertical fragmentation); Özsu & Valduriez (2020), Ch. 2 §2.1 (lossless reconstruction).",
+    "question": "Customer(id,name,email) is vertically fragmented into A(id,name) and B(id,email) at different sites. Which plan reconstructs the original tuples without confusing customers?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l04-q03",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "Global cost optimization, after every local execution has completed",
+      "Local optimization, because only a site knows the global schema",
+      "Data localization, after logical query decomposition",
+      "Two-phase commit, when fragment owners vote"
+    ],
+    "explanation": "Data localization uses fragmentation and directory metadata to substitute physical fragments for global relations. Query decomposition first produces a logical query; global cost optimization then chooses transfers and operator placement; local optimization selects site-level access paths.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 24-26; Özsu & Valduriez (2020), Ch.1 §1.5.3",
+    "question": "A query refers to global relation Orders, but the directory describes Orders_NO and Orders_SE on separate nodes. At which distributed query-processing stage is Orders replaced by its relevant fragment expressions?",
+    "answer": 2
+  },
+  {
+    "id": "in5040-l04-q04",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "The transfer falls from about 8 MB to 20 KB, which may reduce network cost",
+      "The transfer is unchanged, because JOIN always moves the base table",
+      "It makes distributed concurrency control unnecessary",
+      "It guarantees the join result is one-copy serializable"
+    ],
+    "explanation": "40,000 × 200 = 8,000,000 bytes; 100 × 200 = 20,000 bytes. Source-side selection can drastically reduce bytes shipped. It does not settle join correctness, replica semantics, or actual end-to-end cost without considering other operators and network messages.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 24-27; Özsu & Valduriez (2020), Ch.1 §1.5.3",
+    "question": "A remote table has 40,000 rows of 200 bytes, but a local selection leaves 100 matching rows. Assuming the remote DBMS supports the filter and there are no other costs, why push down the selection before a cross-site join?",
+    "answer": 0
+  },
+  {
+    "id": "in5040-l04-q05",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "Both guarantee identical replica values",
+      "2PL controls isolation; 2PC coordinates atomic commit",
+      "2PC prevents distributed deadlock",
+      "2PL ensures durability without logs"
+    ],
+    "explanation": "2PL synchronizes concurrent access; 2PC coordinates an all-or-nothing commit decision across participants. This does not imply that data placement, locking and replica consistency are the same mechanism.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 28-34; Özsu & Valduriez (2020), Ch.5 §§5.1-5.2",
+    "question": "A transaction uses two-phase locking (2PL) and two-phase commit (2PC). Which is correct?",
+    "answer": 1
+  },
+  {
+    "id": "in5040-l04-q06",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "No deadlock, because each local graph has no cycle",
+      "The transactions are already committed by 2PC",
+      "A global deadlock exists; detecting it requires combining cross-site wait dependencies",
+      "Both transactions can be serializable only if all replicas are equal"
+    ],
+    "explanation": "The union of wait dependencies contains T1 → T2 → T1, a cycle. Local-only views miss the cycle; distributed deadlock detection requires inter-site information and typically resolves a cycle by aborting a victim.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 30-32; Özsu & Valduriez (2020), Ch.5 §5.2",
+    "question": "Site A reports the wait T1 → T2, while site B reports T2 → T1. Each site’s own wait-for graph is acyclic. What is the global diagnosis?",
+    "answer": 2
+  },
+  {
+    "id": "in5040-l04-q07",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "Commit immediately because its own YES vote is sufficient",
+      "Abort immediately and forget its prepared state",
+      "Remain prepared and possibly block until a safe decision can be learned",
+      "Release all prepared locks and write an unlogged local commit"
+    ],
+    "explanation": "A YES vote is a promise to follow a later global decision, not the decision itself. The coordinator might already have durably decided COMMIT, so unilateral ABORT or COMMIT would risk violating atomicity. Standard 2PC can block in this uncertain prepared state.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 33-36",
+    "question": "In 2PC, both participants have durably voted YES. The coordinator crashes before participant P learns the global decision. What may P do safely in standard 2PC?",
+    "answer": 2
+  },
+  {
+    "id": "in5040-l04-q08",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "options": [
+      "Update-anywhere and eager propagation",
+      "Primary-copy and lazy propagation",
+      "Full fragmentation and vertical projection",
+      "Two-phase locking and read-one/write-all"
+    ],
+    "explanation": "Primary-copy identifies *where* writes originate, while lazy propagation identifies *when* secondaries are updated. The two classification axes are independent; lazily updated secondaries may serve stale data.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 37-39; Özsu & Valduriez (2020), Ch.6 §6.2",
+    "question": "A system accepts every write at a designated primary and sends updates to other replicas after the primary commits. Which two design choices does it combine?",
+    "answer": 1
+  }
+]

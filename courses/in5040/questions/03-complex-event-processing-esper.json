@@ -1,0 +1,123 @@
+[
+  {
+    "id": "in5040-l03-q01",
+    "question": "What is Complex Event Processing (CEP) adding beyond a filter of individual events?",
+    "options": [
+      "Detection of relationships or sequences among multiple events, potentially including temporal constraints",
+      "Guaranteed physical chronological arrival of all events",
+      "Elimination of the need to keep any state",
+      "Automatic conversion of all streams to static tables"
+    ],
+    "answer": 0,
+    "explanation": "A CEP pattern may require remembering an earlier event and waiting for a related later event; a single-event filter does not capture this sequence.",
+    "source": "Esper assignment briefing, slides 4–5 and 14 (EPL pattern example).",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l03-q02",
+    "question": "In Esper EPL, which view retains the latest seven arriving events as an overlapping rolling window?",
+    "options": [
+      "#length_batch(7)",
+      "#length(7)",
+      "#time_batch(7 sec)",
+      "#ext_timed_batch(timestamp, 7 days)"
+    ],
+    "answer": 1,
+    "explanation": "#length(7) is a count-based sliding window. #length_batch(7) buffers non-overlapping batches, so it does not keep a continuously rolling set.",
+    "source": "Esper assignment briefing, slide 15 (window/view types); Esper 8.2 reference, Data Windows.",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l03-q03",
+    "question": "An Esper query uses WeatherTuple#ext_timed(timestamp, 7 days), where timestamp is epoch milliseconds. What drives window membership?",
+    "options": [
+      "The operator machine’s wall clock",
+      "The supplied timestamp field of arriving events",
+      "Only the number of arriving records",
+      "A fixed number of results emitted by the listener"
+    ],
+    "answer": 1,
+    "explanation": "#ext_timed uses a long timestamp expression to advance an externally timed sliding window; #time uses engine time instead.",
+    "source": "Esper assignment briefing, slides 11 and 15; Esper 8.2 reference, Data Windows.",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l03-q04",
+    "question": "Which statement correctly explains where the every operator is placed in an Esper pattern?",
+    "options": [
+      "every A -> B and every (A -> B) always have the same matching life cycle",
+      "Placing every before A starts new attempts for arriving A events, while every (A -> B) restarts the entire completed sequence",
+      "every converts B events into a count window",
+      "every means the engine has stored every historical event"
+    ],
+    "answer": 1,
+    "explanation": "The position of every changes which subexpression gets restarted. Parentheses are semantically meaningful for match multiplicity and active pattern state.",
+    "source": "Esper 8.2 EPL reference, Event Patterns §§7.5–7.7; IN5040 prior stream-pattern exercises (study context).",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "pensum"
+  },
+  {
+    "id": "in5040-l03-q06",
+    "question": "What does the Esper EPL statement below primarily detect?",
+    "options": [
+      "Every rain event individually, whether followed by sunshine or not",
+      "A sunny report from the same station after each qualifying rain report",
+      "The latest seven reports from all stations",
+      "A mandatory full-history join of both weather stations"
+    ],
+    "answer": 1,
+    "explanation": "The first pattern atom starts a matching attempt at every Rain event; the followed-by atom accepts a later Sunny event with the same stationName.",
+    "source": "Esper assignment briefing, slide 14 (followed-by pattern with correlated fields); Esper 8.2 reference, Event Patterns.",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides",
+    "code": "select a.stationName, b.timestamp from pattern [every a=WeatherTuple(weather='Rain') -> b=WeatherTuple(stationName=a.stationName, weather='Sunny')]"
+  },
+  {
+    "id": "in5040-l03-q07",
+    "question": "A long-running stream query is deployed across edge and cloud hosts. What might make its original operator placement suboptimal?",
+    "options": [
+      "Stream rates, host load, network QoS and source locations can change",
+      "Operator code cannot move between machines once compiled",
+      "A query plan is always optimal for its entire lifetime",
+      "The operator graph has no edges"
+    ],
+    "answer": 0,
+    "explanation": "The L3 lecture explains adaptation: moving a stateful operator can improve latency, balancing and fault tolerance as the environment changes.",
+    "source": "L3 Distributed Stream Processing, slides 9–12 (operator graph, edge/fog/cloud, adaptation).",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l03-q08",
+    "question": "Why does an all-at-once stateful operator migration commonly buffer upstream events?",
+    "options": [
+      "To permanently delete the events during transport",
+      "To continue receiving arrivals while the operator is paused and its state is transferred",
+      "To convert streaming input to OLAP without processing it later",
+      "Because a stateless filter must always keep its entire history"
+    ],
+    "answer": 1,
+    "explanation": "The lecture’s sequence is stop, buffer, extract state, transfer, redirect and resume; without buffering, arrivals during the pause may be lost.",
+    "source": "L3 Distributed Stream Processing, slides 13–16 (all-at-once migration).",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l03-q10",
+    "question": "Why might semantics-aware state migration prioritize a window aggregate that is about to emit?",
+    "options": [
+      "The earliest-needed state can reduce deadline misses and output latency while less urgent state is transferred later",
+      "It guarantees that no coordination or consistency checking is needed",
+      "Every byte of state has the same utility at every instant",
+      "The operator must always migrate the least recently used key first"
+    ],
+    "answer": 0,
+    "explanation": "The proposed lazy/utility-aware approach uses operator semantics and expected state-use times instead of transferring one undifferentiated blob.",
+    "source": "L3 Distributed Stream Processing, slides 19–24 and 27–29 (priority, timed aggregation).",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "coverage": "slides"
+  }
+]

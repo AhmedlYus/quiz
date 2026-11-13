@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "oral-question.schema.json",
   "title": "Oral question file",
-  "description": "A file in oral/ is a JSON list of oral questions. Checked by `npm run check` (lib/oral.js mirrors these rules).",
+  "description": "A file in oral/ is a JSON list of spoken oral questions. Write-a-query questions go in query/ (see query-question.schema.json). Checked by `npm run check` (server/oral/bank.js mirrors these rules).",
   "type": "array",
   "items": { "$ref": "#/$defs/question" },
   "$defs": {
@@ -15,15 +15,15 @@
         "id": {
           "type": "string",
           "pattern": "^oral-[A-Za-z0-9._-]{1,75}$",
-          "description": "Unique and stable, always starting with 'oral-', e.g. 'oral-l02-q03'. Never reuse or rename an id."
+          "description": "Unique across oral/ and query/, always starting with 'oral-', e.g. 'oral-l02-q03'. Never reuse or rename an id."
         },
         "type": {
-          "enum": ["explain", "compare", "walkthrough", "topic", "query"],
-          "description": "explain: explain a concept. compare: X vs Y. walkthrough: explain what given code/query/system does. topic: talk freely for several minutes. query: write an EPL statement in the code editor."
+          "enum": ["explain", "compare", "walkthrough", "topic"],
+          "description": "explain: explain a concept. compare: X vs Y. walkthrough: explain what given code/query/system does. topic: talk freely for several minutes."
         },
         "topic": { "$ref": "#/$defs/text", "description": "Exactly one of the lecture names in course.json." },
         "prompt": { "$ref": "#/$defs/text", "description": "What the examiner asks. Sub-questions go on their own lines as 'a) …', 'b) …'." },
-        "code": { "type": "string", "description": "Optional code, schema or data shown in a monospace block (\\n for new lines). For query questions: the event types/streams available." },
+        "code": { "type": "string", "description": "Optional code, schema or data shown in a monospace block (\\n for new lines)." },
         "hints": {
           "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },
           "description": "Revealed one at a time, each more specific than the last. The last hint still must not give the full answer away."
@@ -32,10 +32,10 @@
           "type": "array", "minItems": 2, "maxItems": 10, "items": { "$ref": "#/$defs/text" },
           "description": "What a complete answer must mention, one point each. Used as the self-check list and as the grading rubric."
         },
-        "modelAnswer": { "$ref": "#/$defs/text", "description": "A strong answer as you would say it at the exam. For query questions: the EPL statement." },
+        "modelAnswer": { "$ref": "#/$defs/text", "description": "A strong answer as you would say it at the exam." },
         "alternatives": {
           "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },
-          "description": "Other acceptable answers, e.g. an equivalent EPL statement."
+          "description": "Other acceptable answers or framings."
         },
         "followUps": {
           "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },

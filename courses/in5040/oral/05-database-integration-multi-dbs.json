@@ -1,0 +1,94 @@
+[
+  {
+    "id": "oral-in5040-l05-q01",
+    "type": "explain",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "prompt": "Explain mediator–wrapper architecture for integrating autonomous databases and contrast physical (warehouse/ETL) versus logical integration. Which components preserve local autonomy?",
+    "keyPoints": [
+      "Explains existing heterogeneous local DBMSs and local conceptual schemas (LCSs).",
+      "Explains the global conceptual/mediated schema (GCS) and virtual integration.",
+      "Explains mediator query rewriting, decomposition and result combination.",
+      "Explains wrappers/export schemas and source-language/result translation.",
+      "Contrasts physical ETL materialization with virtual integration and identifies autonomy/transaction limitations."
+    ],
+    "modelAnswer": "Unlike top-down distributed DB design, a multidatabase system integrates existing local databases whose schemas, languages and policies may differ. Each has a local conceptual schema, and the federation exposes a global conceptual schema, or GCS. In logical integration that global schema is virtual: a query reaches a mediator, which rewrites and decomposes it according to mappings. Wrappers expose each source's relevant data and capabilities, translate the mediator's subqueries to local interfaces and normalize results. The sources retain their own applications and a degree of execution and design autonomy. Physical integration instead uses ETL to materialize an integrated store such as a warehouse, trading extra storage and refresh lag for repeated analytical query performance. A mediator can coordinate reads without obtaining control over every local transaction manager, so globally atomic updates across autonomous sources cannot simply be assumed.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 1–12; Özsu & Valduriez (2020), Ch. 7 introduction and §7.1.",
+    "followUps": [
+      "How does operational freshness differ in a data warehouse and a virtual federation?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Distinguish the global query interface from the source-specific translation layer."
+    ]
+  },
+  {
+    "id": "oral-in5040-l05-q02",
+    "type": "walkthrough",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "prompt": "Two independent customer databases disagree on column names, types and identifier semantics. Walk through translation, matching, integration and mapping into one mediated schema. Explain why a matching ID is not enough.",
+    "keyPoints": [
+      "Translates heterogeneous local conceptual schemas into a common representation where needed.",
+      "Matches structural and semantic correspondences, distinguishing synonyms from homonyms.",
+      "Checks entity/key identity, unit/type transformations and source authority.",
+      "Builds the global conceptual schema through integration and resolves conflicts.",
+      "Defines and maintains executable mappings, not merely informal correspondences."
+    ],
+    "modelAnswer": "I would start with the local conceptual schemas. If one is relational and the other uses a different data model, I would translate them to a sufficiently expressive common representation. Next I would match corresponding concepts such as Client and Customer, checking whether their keys, attribute meanings and cardinalities actually agree. For example CRM client_id '0012' and ERP buyer_no 12 are not necessarily the same person; they may even use different identifier namespaces. Schema integration constructs a coherent global Customer schema and resolves naming, structural and semantic conflicts, possibly defining a source-of-truth policy. Schema mapping then specifies executable transformations: renaming, converting types or units, reconciling identities, and creating global views over each local source. Matching is a hypothesis about correspondence; mapping is an operational relationship that must be updated when local schemas change.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 13–28; Özsu & Valduriez (2020), Ch. 7 §§7.1.1–7.1.4.",
+    "followUps": [
+      "What if two customer tables use the same column name with different meanings?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Identify which differences are about structure and which about actual meaning."
+    ]
+  },
+  {
+    "id": "oral-in5040-l05-q03",
+    "type": "compare",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "prompt": "Contrast GAV and LAV mappings using Customer and two source databases. What changes when a third source is added, and why can LAV query answers be incomplete?",
+    "keyPoints": [
+      "Defines GAV global relations as views over local source relations.",
+      "Explains GAV global query unfolding and maintenance when sources change.",
+      "Defines LAV local relations as views over the independently defined GCS.",
+      "Explains LAV view-based query rewriting and easier addition of sources.",
+      "Explains missing coverage/incomplete answers under available LAV views."
+    ],
+    "modelAnswer": "In GAV, I might define GlobalCustomer as the union of normalized CRM and ERP customer relations. The global relation is explicitly a view over the local sources, so a query over GlobalCustomer can be unfolded into source queries. If a new customer database is added, I may need to change that global view definition. LAV reverses the direction: the global Customer model exists independently, and I describe OsloCRM as a view of customers in Oslo according to that global model. Adding another source means describing another local view. But answering a global query now requires finding a rewriting from available views, which can be difficult. If only Oslo and Bergen views are available, a query for all Norwegian customers can return incomplete results. Neither GAV nor LAV implies a physical warehouse; both concern mapping direction.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 15–17; Özsu & Valduriez (2020), Ch. 7 §7.1.1.",
+    "followUps": [
+      "Which mapping style tends to make query unfolding simpler, and why?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Which side of the mapping equation defines the view?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l05-q04",
+    "type": "walkthrough",
+    "topic": "Lecture 5: Database Integration & Multi-DBS",
+    "prompt": "A global query joins Oslo customers in CRM A to invoices in Billing B, but sources differ in query language and expose limited statistics. Walk through query execution, pushdown and cost estimation.",
+    "keyPoints": [
+      "Rewrites a global query using GCS/source mappings and export schemas.",
+      "Translates source-specific operations through wrappers, including unsupported operators.",
+      "Pushes filters/projections down when efficient and splits cross-source operators.",
+      "Compares mediator-only, local-agent and source-pushdown postprocessing strategies.",
+      "Discusses network/intermediate-result costs and black-box, customized or dynamic cost estimates."
+    ],
+    "modelAnswer": "The client submits SQL over the GCS. The mediator first rewrites the global Customer and Invoice relations using source mappings, and each wrapper translates the appropriate subquery to the local export schema and query language. I would try to push city = Oslo and unnecessary-column removal into CRM A, if its capabilities allow, before transferring results to join with Billing B. For processing, the mediator could do all intermediate joins, local agents could handle source-local work, or capable source DBMSs could accept more pushed-down operators. These choices trade network transfer against available local computation and parallelism. Because the local optimizers and statistics may be hidden, the mediator could benchmark representative queries using a black-box cost model, customize a general model, or adapt estimates dynamically from observed execution. Source autonomy also prevents assuming arbitrary operator support.",
+    "coverage": "slides",
+    "source": "Lecture 5, slides 28–40; Özsu & Valduriez (2020), Ch. 7 §7.2.",
+    "followUps": [
+      "When could pushing down an operation perform worse than processing it at the mediator?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Consider filter selectivity, source operator support and network transfer."
+    ]
+  }
+]

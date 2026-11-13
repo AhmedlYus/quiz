@@ -1,6 +1,7 @@
 // Everything specific to one course lives in its own folder, courses/<name>/:
 //   course.json   settings, lectures, oral options
 //   questions/    quiz questions          oral/    oral questions          prompts/  GPT templates
+//   query/        write-a-query questions
 // The COURSE environment variable picks the folder; with only one folder it is picked automatically.
 // Without a courses/ folder the old layout (course.json and questions/ at the root) still works.
 // This module loads and checks course.json once; the front end gets the public parts through
@@ -99,7 +100,7 @@ export const LECTURES = COURSE.lectures;
 export const SAMPLES_FILE = COURSE.samplesFile || null;
 
 // Missing switches keep the original behaviour: quiz on, oral and query practice off, leaderboard
-// and hints on. Query practice is a round of only the write-a-query questions from oral/, typed
+// and hints on. Query practice is a round of only the write-a-query questions from query/, typed
 // in the code editor; it works whether oral mode is on or not.
 export const MODES = { quiz: true, oral: false, query: false, ...(COURSE.modes || {}) };
 export const FEATURES = { leaderboard: true, hints: true, ...(COURSE.features || {}) };

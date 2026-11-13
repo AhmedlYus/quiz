@@ -1,0 +1,112 @@
+[
+  {
+    "id": "oral-in5040-l03-q01",
+    "type": "compare",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Explain CEP versus ordinary continuous filtering. What state and semantics are involved in an Esper followed-by pattern?",
+    "keyPoints": [
+      "A filter checks one event independently",
+      "CEP correlates event sequences/relationships",
+      "Followed-by requires order of matching events",
+      "Partial pattern matches require stored state",
+      "Every changes the number and lifecycle of matching attempts"
+    ],
+    "modelAnswer": "An ordinary filter evaluates a predicate separately for each event, for example temperature above 35 degrees. Complex Event Processing identifies relations among events, such as a service order followed later by a matching product order, or rain followed by sunshine from the same station. The followed-by operator indicates that the second matching event must arrive after the first, and the engine retains partial-match state while waiting. In Esper, correlation can refer to attributes of the first event when filtering the second. The every operator controls repeated matching: placing it before the first atom starts a new attempt for each qualifying first event, whereas wrapping the entire sequence with every restarts the whole sequence after completion. Because multiple attempts can coexist, duplicates and match multiplicity require careful reasoning.",
+    "source": "Esper assignment briefing, slides 4–5 and 14; Esper 8.2 reference, Event Patterns.",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "What is the purpose of a pattern timer guard?",
+      "Can a single B event satisfy more than one active pattern attempt?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l03-q02",
+    "type": "compare",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Compare Esper EPL windows #length(7), #length_batch(7), #time(7 days) and #ext_timed(timestamp, 7 days). Use the weather-station events from the assignment.",
+    "keyPoints": [
+      "Length is rolling over last N arrivals",
+      "Length_batch buffers non-overlapping groups of N",
+      "Time uses Esper engine time rather than the record timestamp",
+      "Ext_timed uses an explicit long timestamp field for time membership",
+      "Explain why replaying 2014–2018 observations quickly makes time vs ext_timed important"
+    ],
+    "modelAnswer": "In the weather-station assignment, #length(7) maintains a sliding window of the seven most recently arriving WeatherTuple events. #length_batch(7) collects a non-overlapping batch of seven and releases it when full. #time(7 days) is a sliding window defined using Esper’s engine time, which may not correspond to the historical weather-record dates. #ext_timed(timestamp, 7 days) instead uses the timestamp property, whose type is assumed to be long milliseconds, to advance a time window based on the data. This is crucial when replaying observations from 2014–2018 quickly through a program: engine-time windows might see the whole replay in seconds, whereas externally timed windows reflect the dataset’s dates. For a per-station window, the query should also filter or partition by station appropriately.",
+    "source": "Esper assignment briefing, slides 3, 11 and 15; Esper 8.2 reference, Data Windows.",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "How does #length_batch(7) differ from #groupwin(stationName)#length(7)?",
+      "What happens if event timestamps are not monotonically increasing?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l03-q04",
+    "type": "walkthrough",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Walk through the basic all-at-once migration of a stateful operator between two machines. What must be preserved to maintain correct output?",
+    "keyPoints": [
+      "Stop/pause upstream delivery to the operator",
+      "Buffer incoming tuples while paused",
+      "Extract and transfer processing, buffer and routing state",
+      "Redirect connections and resume buffered events",
+      "Explain service interruption and risks of loss/duplication/ordering errors"
+    ],
+    "modelAnswer": "A long-running query can be reconfigured by moving one operator from an old host to a new host. In an all-at-once migration, the system first stops or pauses the operator’s incoming streams and buffers new upstream tuples. It extracts the operator’s state from the old host and transfers it to the new host. That includes processing state such as a join window or running sum, buffer state such as unsent records, and routing state needed to send outputs correctly. It then redirects upstream and downstream connections and resumes processing. The difficulty is to preserve a consistent state boundary: events must not be silently lost, duplicated or processed against inconsistent old and new state. Because the entire state transfer occurs during a pause or buffered period, large states can produce long disruption and rising latency.",
+    "source": "L3 Distributed Stream Processing, slides 13–16 (migration steps and state types).",
+    "coverage": "slides",
+    "seconds": 180,
+    "followUps": [
+      "Why is moving a stateless map easier?",
+      "What is the purpose of the routing state?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l03-q05",
+    "type": "compare",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Compare all-at-once, key-by-key and semantics/utility-aware operator migration in terms of latency, complexity and correctness.",
+    "keyPoints": [
+      "All-at-once treats complete state as atomic and can cause a long pause",
+      "Key-by-key transfers partitions incrementally, requiring more routing coordination",
+      "Utility-aware migration prioritizes state needed for near-term useful output",
+      "Timed aggregates and joins need different state priorities",
+      "Any approach must preserve event/state consistency and weigh migration cost against benefit"
+    ],
+    "modelAnswer": "All-at-once migration pauses an operator and transfers its complete state as a unit; it is conceptually simple but can create a long blocking interval. Key-by-key methods move independent state partitions incrementally, reducing a single large pause but requiring careful routing so each key is processed at the right host during transition. The L3 research proposal adds semantic or utility awareness: not all state is equally urgent. For a timed aggregate, a window that is about to emit should have its state available early. For a join, state needed to evaluate upcoming join predicates has higher immediate value. This scheduling can improve latency, but it adds complexity in estimating utility and coordinating moves. Any method must preserve correctness; if migration overhead exceeds the future performance benefit, migration may not be justified.",
+    "source": "L3 Distributed Stream Processing, slides 16–24 and 27–29 (migration mechanisms, lazy/utility mode).",
+    "coverage": "slides",
+    "seconds": 240,
+    "followUps": [
+      "How might a very hot key affect key-by-key migration?",
+      "Does semantics-aware ordering allow silently dropping state?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l03-ass1-2026-oral05",
+    "type": "walkthrough",
+    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "prompt": "Assignment 1, Question 5: For the event sequence below, enumerate the A/B matches produced by each Esper pattern. Explain the scope of every and why the four results differ.\na) every A -> B\nb) A -> every B\nc) every A -> every B\nd) every (A -> B)",
+    "code": "A1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4\nEvents C and D do not match A or B. Pattern instances may overlap.",
+    "keyPoints": [
+      "a) produces A1-B1, A2-B1, A3-B2, A4-B4.",
+      "b) anchors at the first A1 and matches it with B1, B2, B3, B4.",
+      "c) starts attempts for every A and pairs each with every later B: 12 pairs in this sequence.",
+      "d) restarts the whole A->B sequence only after a completed match: A1-B1, A3-B2, A4-B4.",
+      "Explain that every on the left atom versus around the entire followed-by sequence creates distinct match lifecycles."
+    ],
+    "modelAnswer": "Ignoring C and D, the order is A1, A2, B1, A3, B2, B3, A4, B4. For (a), every A -> B starts a new waiting instance for each A. B1 completes A1 and A2, B2 completes A3, and B4 completes A4: (A1,B1), (A2,B1), (A3,B2), (A4,B4). For (b), A -> every B takes the first A only, A1, and emits (A1,B1), (A1,B2), (A1,B3), (A1,B4). For (c), every A -> every B retains attempts for each A and matches every B afterward: A1 matches B1-B4; A2 also matches B1-B4; A3 matches B2-B4; A4 matches B4: 12 pairs total. For (d), every (A -> B) restarts the *whole* pattern only after completion: A1-B1, then A3-B2, then A4-B4. A2 is ignored while the first pattern is waiting for B1; B3 occurs while the pattern is waiting for another A.",
+    "seconds": 300,
+    "source": "IN5040/IN9040 Mandatory Assignment 1 (H2026), PDF p. 4, Question 5; Esper 8.2 Event Patterns, every / followed-by.",
+    "coverage": "pensum",
+    "hints": [
+      "Which instances start at each A?",
+      "When every surrounds the whole parenthesized pattern, when does it restart?"
+    ],
+    "followUps": [
+      "Why can B1 satisfy two attempts in every A -> B?",
+      "What is the number of matches in every A -> every B, and why can this cause state growth?"
+    ]
+  }
+]

@@ -1,0 +1,123 @@
+[
+  {
+    "id": "oral-in5040-l09-q01",
+    "type": "explain",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "prompt": "Explain scale-up versus scale-out in data management. Then distinguish sharding, replication and cloud elasticity, and identify two reasons why speed-up may be sublinear.",
+    "keyPoints": [
+      "Scale-up increases the capacity of one server; scale-out distributes work across multiple nodes.",
+      "Sharding distributes distinct records/work, while replication stores redundant copies.",
+      "Cloud elasticity provisions/reclaims resources as workload changes but requires parallelizable applications.",
+      "Explain coordination/communication overhead and data skew or serial sections as limits on linear speed-up."
+    ],
+    "modelAnswer": "Scale-up means making a single server larger by adding CPU, RAM or storage. Scale-out means assigning data and processing to multiple nodes, usually in a shared-nothing design. Sharding distributes distinct records or work among nodes; replication keeps copies of the same records to improve availability and sometimes read locality. Elastic cloud infrastructure can add or remove nodes, but it only helps if the workload can use them. Network exchanges, distributed coordination, skewed keys and unavoidable serial work can all prevent linear speed-up. For example, a single global transaction lock may dominate performance despite many servers.",
+    "source": "L9 slides 2-6 (scale-out, cloud characteristics, distributed storage); Özsu & Valduriez, ch. 10 pp. 449-456.",
+    "coverage": "slides",
+    "seconds": 220,
+    "hints": [
+      "Does adding an identical copy store new distinct rows?",
+      "What if only one worker owns the busiest key?"
+    ],
+    "followUps": [
+      "How might you diagnose a partition hotspot?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l09-q02",
+    "type": "walkthrough",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "prompt": "Two replicas DB1 and DB2 are disconnected. A completed write sets x=10 on DB1; DB2 still stores x=0. Discuss what happens if DB2 receives a read, and relate each choice to CAP without confusing it with scalability.",
+    "keyPoints": [
+      "State that CAP addresses consistency versus availability when a network partition occurs.",
+      "Returning x=0 after the completed write would violate linearizable/latest-value consistency.",
+      "Blocking or rejecting the read can preserve C but makes the service unavailable for that request.",
+      "Clarify CAP is not a theorem about scalability or full ACID serializability.",
+      "Explain that eventual convergence requires propagation/reconciliation after the partition heals."
+    ],
+    "modelAnswer": "CAP constrains a replicated data store during a network partition: it cannot guarantee both a linearizable single-copy latest-value view and a successful response at every reachable replica. Here DB1 accepted x=10. If DB2 now answers with its old x=0 after that write completed, the system has served a stale result and not provided linearizable consistency. If DB2 instead blocks or rejects the read until a safe result is possible, it preserves the consistency choice but loses availability for that request. These are AP-like and CP-like behaviors, not labels for whether the database scales. CAP does not equate its C with arbitrary ACID serializability. Once connectivity returns, asynchronous replicas still need an update-propagation and conflict-resolution policy to converge.",
+    "source": "L9 slides 7-10; Özsu & Valduriez, ch. 11 §11.1 (CAP, consistency and partitioning).",
+    "coverage": "slides",
+    "seconds": 250,
+    "hints": [
+      "Ask whether the read can return the latest completed value.",
+      "What is sacrificed if the replica cannot answer right now?"
+    ],
+    "followUps": [
+      "How would an application reconcile conflicting writes from both partitions?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l09-q03",
+    "type": "compare",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "prompt": "Choose appropriate data stores for (a) key-addressed shopping carts, (b) a graph of fraud relationships, and (c) a transactional financial ledger. Explain the trade-offs of NoSQL versus NewSQL.",
+    "keyPoints": [
+      "Key-value access naturally fits keyed session/cart lookup but not arbitrary joins.",
+      "Graph stores favor multi-hop relationship traversals.",
+      "Transactional ledger favors robust transactions/SQL, potentially NewSQL for distributed scaling.",
+      "Explain flexibility and scale-versus-consistency/query semantics without claiming all NoSQL is eventually consistent.",
+      "Describe why network coordination and distributed transactions still add cost."
+    ],
+    "modelAnswer": "For shopping carts addressed by a single cart ID, a key-value store is a natural fit because reads and updates are mostly by key. Fraud investigations with many interconnected entities favor a graph data model because explicit edges support multi-hop traversals. A financial ledger typically needs multi-record transactional correctness and consistent queries, so a relational database or distributed NewSQL system is more appropriate. NoSQL covers several models, not one consistency guarantee: engines differ in indexing, joins and transaction support. NewSQL aims to retain SQL and ACID-style transactions while scaling across nodes, but agreement and cross-partition transactions require coordination. I would choose based on access patterns and correctness requirements rather than a blanket claim that NoSQL is faster.",
+    "source": "L9 slides 11-19 (NoSQL categories, applications, NewSQL); Özsu & Valduriez, ch. 11 §§11.2-11.6.",
+    "coverage": "slides",
+    "seconds": 240,
+    "hints": [
+      "What is the natural data structure for multi-hop links?",
+      "Which use case demands a strong multi-record invariant?"
+    ],
+    "followUps": [
+      "What is the difference between a wide-column store and a column-oriented OLAP engine?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l09-q04",
+    "type": "explain",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "prompt": "What is a polystore? Describe loose versus tight coupling and explain why federating multiple cloud data stores remains difficult.",
+    "keyPoints": [
+      "A polystore provides integrated query access across heterogeneous relational, NoSQL and other stores.",
+      "Loose coupling uses wrappers/mediators to coordinate relatively independent engines.",
+      "Tight coupling has more integrated coordination/query planning and can optimize across stores more directly.",
+      "Query translation, metadata/semantic mismatch and cross-store joins or data movement impose costs.",
+      "Consistency and transaction guarantees may differ across member systems."
+    ],
+    "modelAnswer": "A polystore, also called a multistore, provides a combined query interface for heterogeneous engines, such as relational, document, graph or distributed files, rather than requiring one universal physical store. In loose coupling, adapters or wrappers present sources through a mediator and retain substantial independence; this is easier to evolve but gives the mediator limited control over local execution. Tighter coupling can coordinate query decomposition, movement and execution more directly, potentially improving optimization at the price of stronger dependencies. The hard parts include translating languages and schemas, choosing which engine executes each operation, moving data for joins and reconciling incompatible consistency and transaction guarantees.",
+    "source": "L9 slides 20-24 (polystore designs and coupling); Özsu & Valduriez, ch. 11 §11.7.",
+    "coverage": "slides",
+    "seconds": 235,
+    "hints": [
+      "Think of one query that spans a graph and a SQL database.",
+      "Which design requires deeper integration between query planning and engines?"
+    ],
+    "followUps": [
+      "Why might a cross-store join be much more expensive than a local join?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l09-ass2-2025-cloud-architecture",
+    "type": "walkthrough",
+    "topic": "Lecture 9: Scalable & Cloud Data Management",
+    "prompt": "Design the data-management architecture for a cloud service handling fast-growing event data and changing query demand. Explain how you would scale storage and processing, handle failures and choose between NoSQL and distributed SQL. Identify practical cloud-computing challenges.",
+    "keyPoints": [
+      "Separates scale-up, scale-out and elastic resource provisioning; explains partitioning and parallel execution.",
+      "Distinguishes sharding of distinct data from replication for availability and locality.",
+      "Describes failure handling and a consistency/availability trade-off during partitions without equating CAP with lack of scalability.",
+      "Chooses among NoSQL data models and NewSQL/distributed SQL based on queries, schemas and transactional requirements.",
+      "Discusses skew, network/shuffle cost, multitenancy, security, cost and operational complexity as cloud challenges.",
+      "Explains the need to benchmark workload-specific latency, throughput and correctness rather than assuming more nodes guarantee speed-up."
+    ],
+    "modelAnswer": "I would first profile the workload: which records are accessed together, which updates need transactions, what latency is required, and how uneven the keys are. Scaling up one server is simple but limited. Scaling out places partitions on multiple workers and lets independent queries run in parallel; elasticity adds or removes capacity as demand changes. I would shard distinct records by a useful key and replicate important partitions for fault tolerance, remembering that replicas require a propagation and conflict policy. Under a network partition the CAP trade-off matters for the consistency and availability guarantees chosen by this service. A key-value or document store might fit simple independent access and flexible records, while distributed SQL is more attractive for complex joins and transactional invariants; no one model is automatically best. In the cloud I must also budget for network transfers, uneven hot keys, multitenant interference, storage and egress cost, access control and operational monitoring. I would test actual workload throughput and tail latency before claiming the architecture scales.",
+    "seconds": 280,
+    "hints": [
+      "Think about where data is placed and what happens when a node becomes unreachable.",
+      "Which costs remain even if compute can be provisioned automatically?"
+    ],
+    "followUps": [
+      "What happens when most events have the same partition key?",
+      "When would a distributed SQL system be preferable to a document store?"
+    ],
+    "source": "IN5040 H2025 Assignment 2, Question 8(a–c); L9 Scalable & Cloud Data Management slides 2–24; Özsu & Valduriez, Chapters 10–11; L9 Notion notes.",
+    "coverage": "slides"
+  }
+]

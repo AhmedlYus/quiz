@@ -1,0 +1,137 @@
+[
+  {
+    "id": "in5040-l10-q01",
+    "question": "A million-row table occupies roughly 10,000 data pages. An indexed predicate matches only 10 scattered rows. Which initial access-path expectation is most reasonable?",
+    "options": [
+      "A selective index access is often cheaper than scanning all 10,000 data pages",
+      "A full scan is always cheaper because B-trees require CPU",
+      "The index guarantees exactly zero heap-page reads regardless of columns selected",
+      "No comparison is possible because data pages never affect performance"
+    ],
+    "answer": 0,
+    "explanation": "With only 10 qualifying rows, a B-tree lookup plus a small number of data-page fetches may be far cheaper than a full scan. The exact choice depends on layout, caches, index covering and I/O cost.",
+    "source": "L10 Large Database slides 11-19 (indexes, page access and query performance); instructional estimate.",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q02",
+    "question": "A predicate returns 400,000 scattered rows from a million-row table. Why might an optimizer prefer a sequential scan even though an index exists?",
+    "options": [
+      "Because every index access requires a full table lock",
+      "Because an index cannot be used for equality filtering",
+      "Because many random heap fetches can cost more than sequentially reading the data pages",
+      "Because the SQL standard prohibits index scans above 10 rows"
+    ],
+    "answer": 2,
+    "explanation": "For low selectivity, chasing many scattered record pointers causes substantial random access. A sequential scan can exploit locality and may outperform the index.",
+    "source": "L10 slides 11-20 (full table scan versus index access and cost trade-offs).",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q03",
+    "question": "An index exists on (customer_id, order_date). Which query pattern most naturally uses the leading B-tree key?",
+    "options": [
+      "WHERE order_date >= DATE '2026-10-01' only",
+      "WHERE customer_id = 42 AND order_date >= DATE '2026-10-01'",
+      "ORDER BY amount with no filter",
+      "WHERE LOWER(product_name) = 'hat'"
+    ],
+    "answer": 1,
+    "explanation": "A B-tree composite index is naturally useful when the leading customer_id is constrained, then the second key supports a range. A query using only order_date cannot generally rely on the same efficient left-prefix lookup.",
+    "source": "L10 slides 11-20 (index access and clustering); applied B-tree index reasoning.",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q04",
+    "question": "When can a covering or index-only scan avoid most base-table page accesses?",
+    "options": [
+      "Only when the database stores zero data rows",
+      "Whenever any index exists, independent of the SELECT list",
+      "Only when all rows are updated concurrently",
+      "When all required columns can be obtained from the index and the engine can satisfy visibility constraints"
+    ],
+    "answer": 3,
+    "explanation": "A covering index contains the columns needed for filtering/projecting the query. Some engines still consult visibility or transaction metadata, so an index does not universally eliminate heap access.",
+    "source": "L10 slides 11-20 (index access and index-only strategies); applied physical-access reasoning.",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q05",
+    "question": "Two large tables are joined, but a filter on Orders reduces 10,000,000 rows to 2,000. Which optimization principle most directly reduces intermediate work?",
+    "options": [
+      "Push the selective Orders predicate as early as possible before an expensive join",
+      "Always materialize the 10-million-row join first",
+      "Move all filtering from SQL into client code",
+      "Force a cartesian product and deduplicate after fetching"
+    ],
+    "answer": 0,
+    "explanation": "Predicate pushdown reduces the tuples that downstream join operators must process and move. A join-first physical plan can create far more intermediate work.",
+    "source": "L10 slides 21-32 (efficient SQL and code design); Elmasri/Navathe, Algorithms for Query Processing and Optimization (assigned topic).",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q06",
+    "question": "You join a small filtered customer set to a very large indexed Orders table on customer_id. Which join strategy may be particularly attractive?",
+    "options": [
+      "Always sorting every column in both relations",
+      "Randomly shuffling both inputs without a join key",
+      "Index nested-loop join using each filtered customer to probe Orders",
+      "A cartesian product with no join condition"
+    ],
+    "answer": 2,
+    "explanation": "With a small outer input and an index on the inner join key, indexed nested-loop probes can be efficient. Hash join is also plausible for larger equijoins; no algorithm is universally best.",
+    "source": "L10 slides 21-32 (SQL and access-path strategies); Elmasri/Navathe, query-processing reading context.",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q07",
+    "question": "An EXPLAIN ANALYZE plan estimates 100 rows after a filter but actually produces 900,000. Why is this discrepancy important?",
+    "options": [
+      "It proves all SQL results are incorrect",
+      "Poor cardinality estimates can lead the optimizer to select an inefficient join order or access path",
+      "Actual row counts must always exactly equal estimates for valid SQL",
+      "The optimizer does not use statistics when choosing plans"
+    ],
+    "answer": 1,
+    "explanation": "Cardinality estimates drive cost-based planning. Severe underestimation may favor small-input strategies that perform poorly on the actual large intermediate result. A mismatch does not by itself mean the result is wrong.",
+    "source": "L10 slides 21-32 (efficient SQL, query tuning and execution plans); applied plan-analysis reasoning.",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q08",
+    "question": "A PostgreSQL application filters orders by date, but an ordinary B-tree index exists on order_date. Which predicate is generally more index-friendly without an expression index?",
+    "options": [
+      "WHERE to_char(order_date, 'YYYY') = '2026'",
+      "WHERE date_trunc('year', order_date) = DATE '2026-01-01'",
+      "WHERE EXTRACT(YEAR FROM order_date) = 2026",
+      "WHERE order_date >= DATE '2026-01-01' AND order_date < DATE '2027-01-01'"
+    ],
+    "answer": 3,
+    "explanation": "A half-open range compares the indexed column directly and can support a range scan. Applying a function to each row can block ordinary index use unless a matching expression index or optimizer rewrite exists.",
+    "source": "L10 slides 21-28 (efficient SQL coding and predicate choices); applied B-tree range-access example.",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  },
+  {
+    "id": "in5040-l10-q10",
+    "question": "Transaction T1 updates an account row and then waits for an external API before committing. T2 needs to update the same row and waits. What is the main bottleneck?",
+    "options": [
+      "The absence of a data lake",
+      "A missing GROUP BY clause",
+      "Lock hold time and contention caused by the long-running transaction",
+      "Insufficient dimensional hierarchy normalization"
+    ],
+    "answer": 2,
+    "explanation": "T2 may be blocked by a lock retained by T1; the best fix is to shorten and scope transactions safely, not blindly add indexes or change SELECT syntax.",
+    "source": "L10 slides 33-42 (concurrency, isolation, locked rows and clustering).",
+    "topic": "Lecture 10: Large DBS & Performance Analysis",
+    "coverage": "slides"
+  }
+]

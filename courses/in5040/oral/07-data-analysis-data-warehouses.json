@@ -1,0 +1,123 @@
+[
+  {
+    "id": "oral-in5040-l07-q01",
+    "type": "compare",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "prompt": "Compare OLTP and OLAP. Explain why an enterprise might build a data warehouse rather than run every analytical query against its operational systems.",
+    "keyPoints": [
+      "OLTP emphasizes short transactions, operational correctness and frequent updates; OLAP emphasizes scans, joins and historical aggregation.",
+      "A warehouse integrates heterogeneous operational sources and harmonizes identifiers/semantics.",
+      "Subject-oriented, integrated, time-variant and mostly nonvolatile warehouse data enables reproducible historical analysis.",
+      "A warehouse trades extra ETL, storage and freshness lag for repeatable analysis and reduced load on transaction systems."
+    ],
+    "modelAnswer": "OLTP systems handle many short inserts, updates and selective reads while preserving transactional correctness. OLAP answers broader analytical questions such as historical sales grouped by region and product. An enterprise warehouse extracts data from several operational systems, cleans and harmonizes identifiers, and retains an integrated, subject-oriented, time-variant and largely nonvolatile view. Its main benefits are consistent definitions, repeated multidimensional analysis and isolation of analytical load from OLTP. Costs include ETL complexity, extra storage, governance and data freshness delay.",
+    "source": "L7 slides 14-20 (OLTP, OLAP, four warehouse properties, warehouse architecture); Elmasri/Navathe, Overview of Data Warehousing and OLAP, ch. 29.",
+    "coverage": "slides",
+    "seconds": 220,
+    "hints": [
+      "Consider how often the rows are updated versus aggregated.",
+      "What changes when two sources call the same product by different identifiers?"
+    ],
+    "followUps": [
+      "How does a virtual/federated warehouse differ from a materialized warehouse?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l07-q02",
+    "type": "walkthrough",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "prompt": "Design a warehouse schema for analyzing sales by month, product category and store country. Identify the fact grain, keys, measures and dimensions. Compare star, snowflake and fact constellation designs.",
+    "keyPoints": [
+      "Specify an unambiguous fact grain, e.g. one sold product line per transaction.",
+      "Place dimension foreign keys and additive measures such as quantity/revenue in SalesFact.",
+      "Use date, product and store dimensions with hierarchy attributes for month, category and country.",
+      "Explain star versus snowflake normalization and corresponding join/redundancy trade-offs.",
+      "Explain that a constellation shares dimensions across multiple fact tables and warns of different fact grains."
+    ],
+    "modelAnswer": "I would first declare the grain: each SalesFact row represents one sold product line, not an entire order. SalesFact contains date_key, product_key and store_key pointing to Date, Product and Store, plus quantity and revenue measures. Date includes month and year; Product includes category; Store includes country, making the requested aggregations straightforward. In a star these descriptive hierarchies sit in mostly denormalized dimension tables, which simplifies queries but repeats some attributes. In a snowflake I could normalize category or location hierarchies, reducing redundancy while adding joins. A constellation could add ShipmentsFact and share conformed dimensions, but I would avoid directly joining facts of incompatible grain because this can multiply results.",
+    "source": "L7 slides 30-32 and 59-68 (dimensional schemas, star, snowflake, constellation); Elmasri/Navathe, Overview of Data Warehousing and OLAP, ch. 29.",
+    "coverage": "slides",
+    "seconds": 240,
+    "hints": [
+      "Begin by defining exactly what one fact row represents.",
+      "Distinguish factual measures from grouping attributes."
+    ],
+    "followUps": [
+      "What goes wrong when a sales-line fact is joined directly to an order-shipment fact?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l07-q03",
+    "type": "walkthrough",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "prompt": "Use the sales facts below to explain the base and apex cuboids, compute grand total, perform a city slice and product roll-up, and identify what changes under a pivot.",
+    "keyPoints": [
+      "Base cuboid groups by all available dimensions; apex cuboid aggregates away all dimensions.",
+      "Grand total revenue is 350.",
+      "Slice city=Oslo yields 120+80=200.",
+      "Roll-up by product yields product A=220 and product B=130.",
+      "Pivot changes display orientation rather than values."
+    ],
+    "modelAnswer": "The base cuboid is the finest grouping over city, product and month; the four records are its facts. At the apex we aggregate across every dimension, so revenue is 120 + 80 + 100 + 50 = 350. Fixing the city to Oslo is a slice, yielding 120 + 80 = 200. Rolling up to the product level across city and month yields A=120+100=220 and B=80+50=130. A pivot swaps axes in a displayed report—for example products become columns instead of rows—but it does not recalculate or change the underlying measures.",
+    "source": "L7 slides 74-89 (data cube, cuboid lattice, roll-up, slice and pivot).",
+    "coverage": "slides",
+    "seconds": 210,
+    "hints": [
+      "Which dimensions remain after grouping everything together?",
+      "A pivot changes the presentation, not the facts."
+    ],
+    "followUps": [
+      "How many cuboids are possible with three independent dimensions and no hierarchies?"
+    ],
+    "code": "city    product month revenue\nOslo    A       Jan   120\nOslo    B       Jan    80\nBergen  A       Jan   100\nBergen  B       Feb    50"
+  },
+  {
+    "id": "oral-in5040-l07-q05",
+    "type": "topic",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "prompt": "Walk through the pre-ML, in-ML and post-ML stages of data management. Give one concrete DBMS concern per stage and explain what can go wrong if provenance is ignored.",
+    "keyPoints": [
+      "Pre-ML includes data discovery, joins, cleaning and quality assurance, often including labeling.",
+      "In-ML includes feature extraction/selection and scalable training/inference computation.",
+      "Post-ML manages model versions, artifacts, deployment/serving and debugging.",
+      "Provenance links source data, transformation, labels and model; missing lineage prevents reproducibility and debugging."
+    ],
+    "modelAnswer": "The survey divides data management into pre-ML, in-ML and post-ML. Pre-ML is about finding and preparing suitable data: catalogs, joins, cleaning, deduplication and reliable labels. In-ML uses database and systems ideas to extract or select features and accelerate training or inference through batching, reuse and parallel processing. Post-ML handles model storage and versioning, serving and debugging the deployed pipeline. Provenance is essential throughout: if a model is retrained with changed source labels or preprocessing, we need to know the exact data snapshot, code and artifact versions to understand why predictions changed and to reproduce an experiment.",
+    "source": "L7 slides 4-8; Chai et al. (2023), Data Management for Machine Learning: A Survey, §§1-4.",
+    "coverage": "slides",
+    "seconds": 210,
+    "hints": [
+      "First think about the data before a model can be fitted.",
+      "What remains to manage after a model has been trained?"
+    ],
+    "followUps": [
+      "How can a database system accelerate feature extraction?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l07-ass2-2025-kdd-warehouse-lifecycle",
+    "type": "walkthrough",
+    "topic": "Lecture 7: Data Analysis & Data Warehouses",
+    "prompt": "A retailer wants to discover useful customer-purchasing patterns from several operational databases. Walk through the Knowledge Discovery in Databases (KDD) process and the practical data-warehouse lifecycle. Distinguish data mining from the overall process and identify the role of dimensional design.",
+    "keyPoints": [
+      "Starts from a business problem, data-source selection and understanding of relevant attributes.",
+      "Includes data integration, cleaning, quality checks, transformation and feature preparation before mining.",
+      "Explains data mining as pattern discovery/modeling, followed by evaluation, interpretation and deployment/iteration.",
+      "Describes warehouse requirements, source mapping, dimensional schema/grain, ETL/load and repeated maintenance/refresh.",
+      "Contrasts star, snowflake and constellation schemas by fact grain, dimensions and normalization/shared dimensions.",
+      "Discusses provenance and the risk that poor data quality or leaking records invalidates downstream insights."
+    ],
+    "modelAnswer": "I first define the business question, such as identifying product combinations associated with repeat purchases. The KDD workflow then selects relevant source data, integrates and cleans it, transforms it into useful attributes or transactions, applies a mining technique such as association rules, and evaluates whether the patterns are valid and useful. Mining is one stage, not a synonym for the whole pipeline. To make repeated cross-system analysis sustainable, the organization designs a warehouse: agree on requirements, reconcile sources and dimensions, define the fact-table grain, choose a star or other dimensional design, build ETL, load the data and continuously refresh and govern it. A star keeps descriptive dimensions relatively denormalized; a snowflake normalizes hierarchies; a constellation shares dimensions among multiple fact tables. Throughout, provenance and quality checks matter because a sophisticated mining algorithm cannot repair incorrectly merged or inconsistent sales records.",
+    "seconds": 270,
+    "hints": [
+      "What must happen before you run a mining algorithm?",
+      "What defines one row of a sales fact table?"
+    ],
+    "followUps": [
+      "Where do support and confidence fit in the pipeline?",
+      "Why is a warehouse life cycle not finished after the first ETL load?"
+    ],
+    "source": "IN5040 H2025 Assignment 2, Question 7(a–d); L7 Notion study notes (KDD process, OLTP/OLAP, dimensional modeling); Elmasri & Navathe, Data Mining Concepts and Overview of Data Warehousing and OLAP.",
+    "coverage": "slides"
+  }
+]

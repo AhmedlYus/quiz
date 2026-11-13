@@ -1,11 +1,11 @@
-// Validates oral/*.json of the active course (see server/config/course.js). Part of the Vercel build, so a broken file blocks the deploy.
+// Validates oral/*.json and query/*.json of the active course (see server/config/course.js). Part of the Vercel build, so a broken file blocks the deploy.
 import { loadOralBank } from '../server/oral/bank.js';
 import { LECTURES } from '../server/config/course.js';
 
 const { list, errors } = loadOralBank();
 const known = new Set(LECTURES);
 for (const q of list) {
-  if (!known.has(q.topic)) errors.push(`oral/${q.file} (${q.id}): topic "${q.topic}" is not one of the lectures in course.json`);
+  if (!known.has(q.topic)) errors.push(`${q.folder}/${q.file} (${q.id}): topic "${q.topic}" is not one of the lectures in course.json`);
 }
 if (errors.length) {
   console.error(`Oral bank has ${errors.length} problem(s):\n${errors.map((e) => `  - ${e}`).join('\n')}`);

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "query-question.schema.json",
+  "title": "Query question file",
+  "description": "A file in query/ is a JSON list of write-a-query questions (EPL for IN5040), typed in the code editor and checked against the model query. Needs oral.query in course.json. Checked by `npm run check` (server/oral/bank.js mirrors these rules).",
+  "type": "array",
+  "items": { "$ref": "#/$defs/question" },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "topic", "prompt", "keyPoints", "modelAnswer"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^oral-[A-Za-z0-9._-]{1,75}$",
+          "description": "Unique across oral/ and query/, always starting with 'oral-', e.g. 'oral-l03-q10'. Never reuse or rename an id: ratings are stored by id."
+        },
+        "type": { "const": "query", "description": "Optional; every question in query/ is a query question." },
+        "topic": { "$ref": "#/$defs/text", "description": "Exactly one of the lecture names in course.json." },
+        "prompt": { "$ref": "#/$defs/text", "description": "The task: what the statement must output. Sub-questions go on their own lines as 'a) …', 'b) …'." },
+        "code": { "type": "string", "description": "The streams/event types and their fields, shown in a monospace block (\\n for new lines)." },
+        "hints": {
+          "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },
+          "description": "Revealed one at a time, each more specific than the last. The last hint still must not give the full query away."
+        },
+        "keyPoints": {
+          "type": "array", "minItems": 2, "maxItems": 10, "items": { "$ref": "#/$defs/text" },
+          "description": "What a correct statement must get right (window, filter, aggregates, pattern...), one point each. Used as the self-check list and as the grading rubric."
+        },
+        "modelAnswer": { "$ref": "#/$defs/text", "description": "The model statement, without a trailing semicolon." },
+        "alternatives": {
+          "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },
+          "description": "Other acceptable statements, e.g. a where instead of a stream filter."
+        },
+        "followUps": {
+          "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/text" },
+          "description": "Questions an examiner would ask about the statement."
+        },
+        "seconds": { "type": "integer", "minimum": 30, "maximum": 1800, "description": "Suggested answer time. Query practice is untimed; only used if the question is shown in oral mode (modes.query off)." },
+        "source": { "type": "string", "description": "Where it comes from, e.g. 'Lecture 3; H25 mandatory Esper assignment'." },
+        "coverage": { "enum": ["slides", "pensum"], "description": "slides (default) if taught, pensum if only in the reading list." }
+      }
+    }
+  }
+}

@@ -5,6 +5,6 @@
   "regions": ["fra1"],
   "rewrites": [{ "source": "/api/:path*", "destination": "/api/index?route=:path*" }],
   "functions": {
-    "api/index.js": { "includeFiles": "{courses/**/course.json,courses/**/questions/**,courses/**/oral/**,questions/**,course.json}" }
+    "api/index.js": { "includeFiles": "{courses/**/course.json,courses/**/questions/**,courses/**/oral/**,courses/**/query/**,questions/**,course.json}" }
   }
 }

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "oral-in5040-l08-q01",
+    "type": "walkthrough",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "prompt": "Explain an end-to-end ML pipeline for radiotherapy tumor segmentation from clinical imaging through clinician review. Identify where data management is essential.",
+    "keyPoints": [
+      "Acquire and link CT/PET/MRI data with patient and study metadata and expert contour labels.",
+      "Use patient-level train/validation/test splits and fit preprocessing only on training data.",
+      "Select a suitable segmentation model and evaluate overlap/generalization on held-out patients.",
+      "Record data, annotation, preprocessing and model lineage for reproducibility.",
+      "Integrate into a workflow where clinicians can inspect and correct predicted contours."
+    ],
+    "modelAnswer": "First we define the radiotherapy task and collect images with patient/study identifiers, acquisition metadata and expert tumor/organ-at-risk annotations. We split by patient, then clean, resample and normalize without learning from the held-out test data. A suitable segmentation model predicts a spatial contour; validation assesses overlap metrics such as Dice and robustness across patients or scanners. We version the images, annotations, preprocessing steps and model checkpoints so results are reproducible. Finally we integrate the predictions into planning software for clinician inspection and correction. The model assists rather than automatically replaces clinical judgment.",
+    "source": "L8 Medicine slides 13-18, 29-59 and 60-78 (applications, data pipeline, evaluation, management and clinical integration).",
+    "coverage": "slides",
+    "seconds": 240,
+    "hints": [
+      "Begin with patient IDs and expert contours, not the network architecture.",
+      "Which steps must be reproducible after model retraining?"
+    ],
+    "followUps": [
+      "Why is a high Dice score alone insufficient for clinical approval?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l08-q02",
+    "type": "walkthrough",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "prompt": "A model predicts every case as negative in a cohort of 90 negatives and 10 positives. Explain why its apparent accuracy is misleading and what evaluation design would be better.",
+    "keyPoints": [
+      "Compute 90% accuracy and 0% sensitivity for the positive class.",
+      "Relate class imbalance and unequal false-positive/false-negative costs to medical decision support.",
+      "Explain patient-level held-out evaluation and avoid train/test leakage.",
+      "Mention clinically appropriate metrics and validation on another institution/scanner when feasible."
+    ],
+    "modelAnswer": "Always predicting negative gets 90 out of 100 cases right, so accuracy is 90%, but it detects none of the 10 positive cases: sensitivity is 0%. In screening, missed positives may carry high clinical cost, so we must report sensitivity and specificity, precision or calibration when relevant, not only accuracy. Evaluation should separate patients between training and held-out test sets, with no preprocessing fitted on test data. Where feasible we also test on other scanners and clinical institutions to assess whether domain shift reduces performance.",
+    "source": "L8 Medicine slides 40-58 (data quality, model evaluation and practical clinical constraints); numerical cohort is an instructional scenario.",
+    "coverage": "slides",
+    "seconds": 210,
+    "hints": [
+      "How many positive patients are detected?",
+      "Could the dataset be highly imbalanced?"
+    ],
+    "followUps": [
+      "What changes if the cost of a false negative is much higher than a false positive?"
+    ]
+  },
+  {
+    "id": "oral-in5040-l08-q03",
+    "type": "explain",
+    "topic": "Lecture 8: Medical Data & Machine Learning",
+    "prompt": "Why is provenance and experiment tracking particularly important when managing medical image ML systems?",
+    "keyPoints": [
+      "Medical pipelines combine images, clinical metadata, expert labels and preprocessing.",
+      "Record patient/study identity, dataset and annotation versions, splits and transformation code.",
+      "Track model architecture, hyperparameters, checkpoints and evaluation results.",
+      "Explain reproducibility, error investigation and safe hand-off to clinical users."
+    ],
+    "modelAnswer": "Medical ML results depend on the exact images, patient and study metadata, human annotations and preprocessing, not only the network weights. We therefore track versions of every source image and label, patient-level split assignments, preprocessing code and parameters, and the trained architecture, hyperparameters, checkpoints and metrics. If an output changes or a clinician flags a bad contour, lineage lets us identify the responsible input, labeling or model change and reproduce the result. This is critical for collaborative research, rigorous evaluation and safe clinical hand-off.",
+    "source": "L8 Medicine slides 40-48 and 59-78 (data saved, model management, reproducibility and clinical pipeline).",
+    "coverage": "slides",
+    "seconds": 200,
+    "hints": [
+      "Think beyond just saving trained weights.",
+      "What would you need to recreate a prediction six months later?"
+    ]
+  }
+]

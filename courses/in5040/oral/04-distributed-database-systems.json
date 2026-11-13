@@ -1,0 +1,120 @@
+[
+  {
+    "id": "oral-in5040-l04-q01",
+    "type": "walkthrough",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "Consider Customer(id, name, country, email) queried mainly by country on two sites. Design a distributed placement and explain horizontal vs vertical fragmentation, reconstruction and replication choices.",
+    "keyPoints": [
+      "Distinguishes a logically unified distributed DBMS from just remote client/server access.",
+      "Explains horizontal partitioning by country and row reconstruction using union.",
+      "Explains vertical partitioning and why a common key is needed for lossless reconstruction by join.",
+      "States completeness and reconstructability (and when disjointness matters).",
+      "Separates fragmentation from allocation and replication; defends locality and update-cost trade-offs."
+    ],
+    "modelAnswer": "I would keep one logical Customer relation but distribute its fragments across the two sites. If access is mostly country-specific, I would first consider horizontal fragments for Norway and Sweden, then allocate those fragments close to their users. Taking the union of complete country fragments reconstructs the global relation. If queries instead frequently need only certain columns, I could use vertical fragments such as (id,name,country) and (id,email), keeping the common unique id so a join reconstructs the original tuples. The fragmentation must preserve all original information and permit reconstruction; disjointness is useful for a nonreplicated horizontal design. Allocation decides which site holds each fragment, whereas replication adds further copies. Replicating a small read-heavy lookup table can reduce remote joins, but updates then need propagation or coordination. I would base the final choice on read/write patterns and skew, not on distribution for its own sake.",
+    "coverage": "pensum",
+    "source": "Lecture 4, slides 2–6 and 21–23; Özsu & Valduriez (2020), Ch. 1 §1.1 and Ch. 2 §§2.1–2.2.",
+    "followUps": [
+      "What happens if the horizontal predicates do not cover every customer?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Think about reconstruction and where each data fragment physically belongs."
+    ]
+  },
+  {
+    "id": "oral-in5040-l04-q02",
+    "type": "walkthrough",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "A global query joins region-partitioned Orders to Products stored on another site. Trace the distributed query-processing pipeline and explain how you would choose where the join executes.",
+    "keyPoints": [
+      "Explains global logical decomposition before choosing physical sites.",
+      "Localizes global relations to actual fragments using directory/fragment metadata.",
+      "Compares global placement, join order, pushdown and transferred cardinalities.",
+      "Explains local physical optimization and final result assembly.",
+      "Distinguishes network, CPU, I/O and latency/throughput objectives with a concrete cost comparison."
+    ],
+    "modelAnswer": "I start by decomposing the global SQL into a logical plan with selection, projection and a join. Data localization then replaces Orders with the regional fragments from the distributed catalogue, possibly pruning regions excluded by the filter. The global optimizer compares plans that transfer Orders rows, ship a smaller Products input, or push selections and projections to reduce intermediate data. For instance, moving 100 matching product rows is often cheaper than moving thousands of complete orders, although I would also account for network round trips, indexes, CPU, I/O, selectivity and concurrent load. The local optimizers then choose scans, indexes and join implementations for the operators assigned to each site. Finally partial results are combined. Optimizing the response time of one query and maximizing overall throughput are related but not identical objectives.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 23–27; Özsu & Valduriez (2020), Ch. 1 §1.5.3.",
+    "followUps": [
+      "What changes if Products is replicated at every regional site?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Start with global SQL and ask when real fragment locations become known."
+    ]
+  },
+  {
+    "id": "oral-in5040-l04-q04",
+    "type": "walkthrough",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "A bank transfer debits an account at site X and credits an account at site Y. Walk through two-phase commit (2PC), including the case where the coordinator fails after both sites vote YES.",
+    "keyPoints": [
+      "Identifies coordinator and participants with a shared atomic decision.",
+      "Explains PREPARE and durable YES/NO votes from participants.",
+      "Explains COMMIT if every participant votes YES, otherwise ABORT, with logged decision and notifications.",
+      "Explains a prepared participant cannot unilaterally commit or abort when the decision is unknown.",
+      "Explains blocking after coordinator failure and the role of recovery/transaction logs."
+    ],
+    "modelAnswer": "To make the transfer atomic, a coordinator runs 2PC over sites X and Y. In phase one it sends PREPARE. Each site checks whether it can finish, records the necessary durable state and votes YES or NO. If either votes NO or fails to prepare, the coordinator decides ABORT; only if every participant votes YES can it log a global COMMIT and notify all participants in phase two. Each participant then records and carries out the decision, typically acknowledging it. The failure case is important: if both sites have voted YES but the coordinator crashes before one participant learns the decision, that prepared site cannot safely guess COMMIT or ABORT. The coordinator might already have logged a commit. Standard 2PC can therefore block until recovery or a safe decision is learned. Logging supports recovery, but 2PC itself does not provide concurrency isolation; that is a separate mechanism.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 33–36 and 40 (protocol, failure/recovery).",
+    "followUps": [
+      "Why does a timeout not automatically permit a prepared participant to abort?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Focus on the distinction between a YES vote and a recorded global decision."
+    ]
+  },
+  {
+    "id": "oral-in5040-l04-q05",
+    "type": "compare",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "Compare primary-copy vs update-anywhere and eager vs lazy replication. What happens under a network partition in a read-one/write-all design, and why is matching replica state not proof of one-copy serializability?",
+    "keyPoints": [
+      "Distinguishes write-origin policy from propagation-timing policy.",
+      "Compares eager coordination and lazy staleness with read/write costs.",
+      "Explains ROWA: read one eligible copy, write all required copies.",
+      "Explains network partitions may prevent committing writes that require unreachable replicas.",
+      "Separates mutual consistency/equal values from one-copy serializability of full histories."
+    ],
+    "modelAnswer": "Replication has two independent design choices. Primary-copy versus update-anywhere specifies which replicas accept writes; eager versus lazy specifies when copies receive those writes. Eager propagation coordinates required replicas within the transaction, increasing update cost, while lazy propagation can leave secondaries stale and may require read restrictions or conflict reconciliation. In read-one/write-all, an eligible read uses one copy, but a write coordinates every required copy. If a network partition makes a required replica unreachable, writes may no longer commit even though some reads can still succeed. Finally, mutual consistency asks whether copies agree, whereas one-copy serializability asks whether the complete transaction history is equivalent to some serial execution on a single logical copy. Two copies ending with the same balance do not establish that transactions observed a legal ordering during execution.",
+    "coverage": "slides",
+    "source": "Lecture 4, slides 37–41; Özsu & Valduriez (2020), Ch. 6 §§6.1–6.2 (later §6.3 not included in supplied extract).",
+    "followUps": [
+      "How can a lazy primary-copy system avoid returning stale secondary reads when freshness is required?"
+    ],
+    "seconds": 240,
+    "hints": [
+      "Separate the origin of writes from their propagation timing."
+    ]
+  },
+  {
+    "id": "oral-in5040-l04-ass2-2025-architecture",
+    "type": "topic",
+    "topic": "Lecture 4: Distributed Database Systems",
+    "prompt": "Starting with a centralized database, explain why an organization might adopt a distributed DBMS. Classify distributed database systems using the three independent dimensions taught in L4, and discuss two approaches to building one. What benefits and costs follow?",
+    "keyPoints": [
+      "Distinguishes one centralized DBMS from a logically unified database spread across multiple networked sites.",
+      "Motivates distribution using data locality, availability, autonomy and parallel processing; notes network and coordination costs.",
+      "Names and explains distribution, heterogeneity and autonomy as independent classification dimensions.",
+      "Contrasts a top-down distributed-database design (fragmentation, allocation and possible replication) with bottom-up integration of pre-existing databases.",
+      "Explains distribution transparency and why it may be imperfect under failures or heterogeneity.",
+      "Discusses trade-offs involving consistency, distributed queries, transactions and failure recovery."
+    ],
+    "modelAnswer": "A centralized DBMS primarily manages its data at one site. A distributed DBMS makes data stored or processed at multiple networked sites appear as one logical database. Distribution can improve locality, availability and parallelism, but network delays and coordinating transactions add costs. I classify a design along three separate dimensions: how physically distributed it is, how heterogeneous its DBMSs and models are, and how independently its component systems can act (autonomy). These are not interchangeable: two sites can use the same engine, and heterogeneous sources can still be centrally coordinated. In a top-down approach, we design one global database and choose fragments, placement and replicas. In a bottom-up approach we integrate databases that already exist, using schema mappings and possibly mediator/wrapper interfaces; this naturally connects to L5. The system may hide physical placement from users, but network partitions, remote query costs and global transactions make full transparency hard. The right architecture balances locality and scalability against operational complexity and correctness.",
+    "seconds": 260,
+    "hints": [
+      "Which three properties distinguish the physical location, engine differences and independent control?",
+      "Think about designing a new global database versus integrating existing databases."
+    ],
+    "followUps": [
+      "Could two databases be distributed but homogeneous?",
+      "What makes bottom-up integration difficult when sources are autonomous?"
+    ],
+    "source": "L4 slides 2–20 and 21–23 (architecture, classification and distribution); IN5040 H2025 Assignment 2, Question 4(a–e); L4 Notion study notes, architecture section.",
+    "coverage": "slides"
+  }
+]
