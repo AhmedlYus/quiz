@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l09-q01",
+    "id": "in5040-l09-q01-v2",
     "question": "A data service doubles its worker nodes but a global lock serializes every transaction. What is the most defensible performance prediction?",
     "options": [
-      "The lock can remain the bottleneck; adding nodes alone does not guarantee useful speed-up",
-      "CAP theorem guarantees perfect scalability",
-      "Replication automatically removes any global coordination",
-      "Throughput must double because the cluster has twice the CPUs"
+      "The global lock can still serialize work, so adding workers may leave throughput nearly unchanged",
+      "Twice the workers can bypass the shared lock by duplicating lock state across the cluster",
+      "The extra CPUs remove the sequential fraction once data are stored on different physical disks",
+      "Throughput should grow with worker count because the global lock cost is diluted when additional CPUs are available"
     ],
     "answer": 0,
     "explanation": "A serial critical section limits speed-up and may dominate throughput. Horizontal scaling only helps when meaningful work can be partitioned and coordination costs remain manageable.",
@@ -15,13 +15,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q02",
+    "id": "in5040-l09-q02-v2",
     "question": "Which statement correctly distinguishes sharding from replication?",
     "options": [
-      "Sharding is only possible in a shared-memory machine",
-      "Replication increases the amount of distinct logical data stored without any extra disk usage",
-      "Sharding distributes distinct records; replication maintains redundant copies of the same records",
-      "Sharding and replication both mean duplicating every record onto every node"
+      "Sharding creates redundant copies for reads, while replication distributes distinct logical keys across nodes",
+      "Replication adds distinct records to the logical dataset, while sharding mainly increases read availability",
+      "Sharding divides distinct records across nodes; replication stores additional copies of existing records",
+      "Sharding and replication differ only in placement strategy; each necessarily duplicates the full table"
     ],
     "answer": 2,
     "explanation": "Sharding partitions responsibility for records, while replication creates redundant copies for availability, locality or reads. They can be combined but have different capacity and consistency effects.",
@@ -30,13 +30,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q04",
+    "id": "in5040-l09-q04-v2",
     "question": "Two replicas are disconnected. DB1 accepts write x = 10; DB2 has x = 0. To preserve linearizable reads during the partition, what must DB2 avoid?",
     "options": [
-      "Losing availability for that request",
-      "Refusing a request it cannot answer consistently",
-      "Blocking until it can determine a safe result",
-      "Returning the stale x = 0 as if it were current after the completed write"
+      "Failing a read rather than returning data when replicas cannot coordinate safely",
+      "Rejecting a read whose consistency requirements cannot be established with the currently reachable nodes",
+      "Blocking the request while obtaining evidence of the most recent completed write or safe serving state",
+      "Replying with stale x = 0 as the current value after DB1 has already completed the write x = 10"
     ],
     "answer": 3,
     "explanation": "Serving x=0 after a completed x=10 write would violate the single-copy latest-value view if the write is ordered before the read. A CP-style choice can block or reject the read at DB2, sacrificing availability.",
@@ -45,13 +45,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q06",
+    "id": "in5040-l09-q06-v2",
     "question": "A web application reads shopping carts almost exclusively by cart ID and wants flexible values at large scale. Which data model is the most natural primary fit?",
     "options": [
-      "A pure OLAP cube indexed exclusively by date",
-      "A static PDF archive with no query API",
-      "Key-value store",
-      "Graph-only traversal store"
+      "A document store optimized for filtering nested cart properties across many customers, rather than direct cart-ID lookup",
+      "A graph store optimized for multi-hop relationships between shopping carts, products and customers",
+      "A key-value store optimized for fetching and updating one flexible cart value by a known cart ID",
+      "A columnar warehouse optimized for aggregate scans of purchase trends rather than individual cart writes"
     ],
     "answer": 2,
     "explanation": "The key-value model directly supports access by known key and a flexible value. It does not by itself provide rich joins or arbitrary relationship traversals.",
@@ -60,13 +60,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q07",
+    "id": "in5040-l09-q07-v2",
     "question": "An investigation repeatedly traverses relationships among suspects, companies, addresses and transactions. Which database model best matches the central query pattern?",
     "options": [
-      "Key-value store without any secondary structure",
-      "Graph data model with explicit edges and traversal operations",
-      "A data lake that does not permit graph processing",
-      "Document storage alone because relationships never matter"
+      "A document store that keeps each transaction with embedded parties, requiring manual joins to traverse other documents",
+      "A graph store with explicit entity relationships and indexes for efficient multi-hop path exploration queries",
+      "A wide-column store that retrieves each suspect by row key but does not directly model linked entities",
+      "A key-value store holding each relationship list as a blob, requiring custom application traversals"
     ],
     "answer": 1,
     "explanation": "Graph stores represent entities and links directly, making multi-hop traversals and pattern queries a natural operation. Simple key-value lookup has no inherent graph traversal language.",
@@ -75,13 +75,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q09",
+    "id": "in5040-l09-q09-v2",
     "question": "Why might an enterprise prefer a NewSQL/distributed SQL system over a simple key-value store for a transactional ledger?",
     "options": [
-      "It offers relational SQL and transactional semantics while aiming to distribute workload; coordination still costs something",
-      "It guarantees zero network latency for cross-partition transactions",
-      "It prevents use of secondary indexes and joins",
-      "It necessarily sacrifices all transaction guarantees to scale"
+      "Distributed SQL can combine relational queries and transactions with scale-out, though coordination still has costs",
+      "Distributed SQL avoids transaction coordination by applying each ledger transfer as two unrelated local updates",
+      "A key-value system typically coordinates cross-record ledger operations with less complexity than relational transactions",
+      "NewSQL is mainly an OLAP interface and therefore cannot enforce operational ledger invariants across records"
     ],
     "answer": 0,
     "explanation": "NewSQL aims to combine SQL/ACID-style transactional capabilities with distributed scaling. It does not eliminate costs of consensus, coordination and multi-partition operations.",
@@ -90,13 +90,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q10",
+    "id": "in5040-l09-q10-v2",
     "question": "What is the defining challenge a polystore addresses?",
     "options": [
-      "Removing the need to translate queries or reconcile schema semantics",
-      "Replacing every data model with a single flat text file",
-      "Making multiple heterogeneous stores queryable through a coordinated interface and processing plan",
-      "Forcing every source to use one identical physical storage engine"
+      "Making several databases use the same serialization format so their schema and query semantics become identical",
+      "Moving heterogeneous data into one fixed storage engine so a single local optimizer can execute every operation",
+      "Coordinating queries across specialized stores while handling differences in models, capabilities and placement",
+      "Keeping each store entirely isolated and issuing independent queries without reconciling any cross-store results"
     ],
     "answer": 2,
     "explanation": "Polystores integrate SQL, NoSQL and other engines while retaining specialized stores. Query translation, placement of computation and heterogeneous semantics are central difficulties.",
@@ -105,13 +105,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l09-q11",
+    "id": "in5040-l09-q11-v2",
     "question": "Which feature is characteristic of the original Google File System (GFS) design described in the assigned distributed storage reading?",
     "options": [
-      "A central master manages metadata and clients transfer all file payload through it",
-      "Files are stored in chunks at chunk servers, and clients obtain locations from the master then access chunk servers",
-      "Each client must copy every file in its entirety before any read",
-      "It stores only relational rows in a conventional OLTP table"
+      "The master serves both metadata and bulk file payloads, while chunk servers hold only redundant recovery metadata",
+      "Clients obtain chunk locations from a master and transfer file content directly to replicated chunk servers",
+      "Clients download the full file catalogue before reading, and each chunk is stored only on the requesting client",
+      "Chunk servers centrally choose namespaces and route all file data through the master during each read request"
     ],
     "answer": 1,
     "explanation": "GFS separates metadata management (master) from chunk payload storage (chunk servers). After locating chunks via the master, clients read data from chunk servers rather than routing file bytes through the master.",
@@ -120,13 +120,13 @@
     "coverage": "pensum"
   },
   {
-    "id": "in5040-l09-q12",
+    "id": "in5040-l09-q12-v2",
     "question": "A distributed table is hash-partitioned by customer_id, but one customer produces most traffic. Why can adding workers fail to improve this workload?",
     "options": [
-      "Skew is possible only in a single-machine DBMS",
-      "Increasing workers always reduces per-key coordination",
-      "Hash partitioning always redistributes one hot key across all workers",
-      "The hotspot may remain assigned to one partition/worker, making it the straggler"
+      "A sufficiently strong hash function distributes each record of a hot key to a different worker without changing semantics",
+      "Adding workers reduces network cost but makes all hot-key records process in arrival order at every worker",
+      "Balanced counts of unique partition keys imply balanced traffic even if individual keys have highly unequal activity",
+      "The busiest key may remain mapped to one worker, making it the bottleneck despite unused capacity elsewhere"
     ],
     "answer": 3,
     "explanation": "All records for one join/partition key may map to the same worker. That worker dominates latency, so extra idle workers provide little benefit unless the design addresses hot keys or skew.",

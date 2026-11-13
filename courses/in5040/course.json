@@ -6,7 +6,7 @@
   "lectures": [
     "Lecture 1: Introduction & Big Data Challenges",
     "Lecture 2: Data Stream Processing",
-    "Lecture 3: Complex Event Processing & Esper",
+    "Lecture 3: Complex Event Processing, Esper & Operator Migration",
     "Lecture 4: Distributed Database Systems",
     "Lecture 5: Database Integration & Multi-DBS",
     "Lecture 6: Web Data Management",

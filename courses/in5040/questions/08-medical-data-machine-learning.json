@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l08-q01",
+    "id": "in5040-l08-q01-v2",
     "question": "A hospital has three scans from each patient. Which train/test split best avoids leakage when evaluating a disease-classification model?",
     "options": [
-      "Keep all scans from one patient in the same partition",
-      "Train on augmented images and test on their originals",
-      "Select the split that gives the highest test accuracy",
-      "Randomly split all scans, even when the same patient appears in both sets"
+      "Keep every scan from the same patient together in either training or the held-out test partition",
+      "Place the original scan in testing and augmented variants in training to measure robustness under augmentation",
+      "Randomize scans independently and then adjust the chosen split based on which gives the highest test score",
+      "Balance the number of scans per partition, even if some patients contribute images to both partitions"
     ],
     "answer": 0,
     "explanation": "Patient-level separation prevents a model from exploiting highly similar images from one patient in both training and testing. Random image-level splits can inflate reported generalization.",
@@ -45,13 +45,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l08-q05",
+    "id": "in5040-l08-q05-v2",
     "question": "A PET image and a CT image from one patient are combined for prediction. What is the central data-management challenge?",
     "options": [
-      "Their spatial alignment, acquisition protocols and patient identifiers must be reconciled",
-      "Their labels must always be ignored",
-      "They necessarily have identical geometry and acquisition times",
-      "They are both plain-text files and require no metadata"
+      "Align the modalities spatially and reconcile acquisition metadata and patient/study identifiers",
+      "Average image intensities across modalities, because registration is unnecessary for scans of the same patient",
+      "Use the CT acquisition timestamp alone to align every PET voxel, irrespective of scanner geometry",
+      "Convert both modalities into identical arrays, which also guarantees matching anatomical coordinates and labels"
     ],
     "answer": 0,
     "explanation": "Multimodal learning can combine complementary information, but registration/alignment, metadata and identity consistency are required. Different modalities are not automatically in a shared coordinate system.",
@@ -60,13 +60,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l08-q07",
+    "id": "in5040-l08-q07-v2",
     "question": "A lab wants to reproduce a tumor segmentation result after changing labels and preprocessing code. Which artifact set is most useful?",
     "options": [
-      "Only the final test accuracy",
-      "Raw image and exact label, split, preprocessing, code and model versions",
-      "Only a screenshot of the output",
-      "Only the model file name without its contents"
+      "The trained weights and final segmentation score, since the original image and annotation versions can be inferred",
+      "Exact images, annotations, split definitions, preprocessing code and versions, plus model and training metadata",
+      "The predicted masks and patient identifiers, since transformations can be reconstructed from output geometries",
+      "The model architecture and inference logs, without storing dataset/annotation versions or training configuration"
     ],
     "answer": 1,
     "explanation": "Data and model lineage connects inputs, preprocessing, annotations, code and checkpoints. A metric alone cannot explain or reproduce a result when the data or pipeline changes.",

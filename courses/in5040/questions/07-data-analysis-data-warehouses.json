@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l07-q01",
+    "id": "in5040-l07-q01-v2",
     "question": "A product team needs to compare yearly revenue by city and product category across several operational systems. Which design best matches the workload?",
     "options": [
-      "Build an integrated historical warehouse with a sales fact and conformed dimensions",
-      "Use only a key-value store addressed by individual order ID",
-      "Use transaction-level locking to ensure every analytical query updates a row",
-      "Issue thousands of row updates directly to the OLTP order database while building the report"
+      "Create an integrated historical warehouse with a sales fact and consistent product, location and time dimensions",
+      "Build a replicated OLTP order database and run each yearly report through transactional point lookups",
+      "Use a search index over raw order documents, then infer city and category totals independently in each source",
+      "Expose each source as an isolated data mart without common customer or product identifiers across systems"
     ],
     "answer": 0,
     "explanation": "A warehouse integrates sources and supports historical, aggregate OLAP queries. OLTP is optimized for short operational transactions rather than broad multidimensional analysis.",
@@ -15,13 +15,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l07-q02",
+    "id": "in5040-l07-q02-v2",
     "question": "SalesFact stores one row per sold product line. A shipment table stores three shipment rows for an order with two sales lines. Why could joining both tables on order_id and then summing sales revenue be wrong?",
     "options": [
-      "A star schema never permits joining other fact tables",
-      "Summation is impossible for a relational fact table",
-      "Each sales row may be repeated for every shipment row, multiplying revenue",
-      "A foreign key from the fact table prevents all repeated rows"
+      "A fact-to-fact join preserves revenue sums because both tables reference the same order identifier",
+      "Aggregating by order after the join removes shipment duplication, because order IDs define a unique fact grain",
+      "Each sales-line amount can appear once per matching shipment, inflating the revenue sum across joined rows",
+      "A sales fact cannot be joined to shipments unless the two tables have identical columns and physical row counts"
     ],
     "answer": 2,
     "explanation": "The join can produce 2 × 3 = 6 rows for that order; each original sale line may be counted three times. Aggregation should respect the facts’ grains, not assume a join preserves measures.",
@@ -30,13 +30,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l07-q03",
+    "id": "in5040-l07-q03-v2",
     "question": "A product dimension contains product, brand and supplier details. Which structural change most clearly makes a star design more snowflake-like?",
     "options": [
-      "Delete all dimension foreign keys",
-      "Normalize supplier or brand attributes into separate linked dimension tables",
-      "Add a second unrelated measure to the fact table",
-      "Move revenue from SalesFact into Product"
+      "Put all brand, supplier and product properties inside SalesFact to reduce the number of dimension references",
+      "Move brand or supplier hierarchies into linked dimension tables, normalizing the original product dimension",
+      "Add a separate daily sales fact with the same product dimension, turning the original star into a normalized snowflake",
+      "Duplicate the product attributes for every sale line, making the product table unnecessary for joins"
     ],
     "answer": 1,
     "explanation": "Snowflake designs normalize dimension hierarchies into separate tables, reducing redundancy but creating additional joins. Moving measures into dimensions does not define a snowflake.",
@@ -60,13 +60,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l07-q05",
+    "id": "in5040-l07-q05-v2",
     "question": "A report changes from sales by (product, country, month) to sales by (product, country, year). Which OLAP operation occurred?",
     "options": [
-      "Roll-up along time",
-      "Pivot of row and column axes",
-      "Slice on a fixed product",
-      "Drill-down along time"
+      "Roll-up: replace the month level with its coarser year level along the time hierarchy",
+      "Pivot: swap the displayed time dimension with product, retaining the same grouping granularity",
+      "Slice: choose one fixed time value and remove the other periods from the report result",
+      "Drill-down: move to a finer-grained time level by replacing years with their months"
     ],
     "answer": 0,
     "explanation": "Month → year moves upward in the time hierarchy, reducing detail: roll-up. Drill-down goes in the opposite direction; pivot only reorients displayed axes.",
@@ -75,13 +75,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l07-q07",
+    "id": "in5040-l07-q07-v2",
     "question": "An analyst fixes city = Oslo and then restricts month to January or February and product to A or B. Which descriptions apply?",
     "options": [
-      "Only a drill-down, because detail is increased",
-      "A slice on city combined with a dice over selected month and product values",
-      "A roll-up, because at least one dimension is fixed",
-      "Only a pivot, because the cube is rotated"
+      "A drill-down on city followed by a roll-up over selected months, reducing both dimension detail and filter scope",
+      "A slice fixing the city and a dice restricting selected values of month and product",
+      "A roll-up from city to country followed by a slice that removes the time dimension",
+      "A pivot moving city to columns and a drill-down that adds additional hierarchy levels"
     ],
     "answer": 1,
     "explanation": "Slice selects one dimension value; dice selects a subcube over ranges/sets in multiple dimensions. Neither is the same as reorienting axes (pivot).",
@@ -90,13 +90,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l07-q11",
+    "id": "in5040-l07-q11-v2",
     "question": "According to Chai et al., which sequence most accurately allocates work across the ML data-management lifecycle?",
     "options": [
-      "Pre-ML = serving; in-ML = deleting data; post-ML = feature cleaning",
-      "Pre-ML = discovery/cleaning/labeling; in-ML = features/training acceleration; post-ML = model storage/serving/debugging",
-      "Pre-ML = only GPU training; in-ML = only database backup; post-ML = only visualization",
-      "Data management ends when preprocessing is complete"
+      "Pre-ML focuses on model serving, in-ML reconciles source schemas, and post-ML handles input labeling and cleaning",
+      "Pre-ML prepares and labels data, in-ML supports features and training, and post-ML versions, serves and debugs models",
+      "Pre-ML performs the training, in-ML validates a fixed model, and post-ML extracts features from operational databases",
+      "Pre-ML builds model registries, in-ML audits source permissions, and post-ML prepares and labels input data"
     ],
     "answer": 1,
     "explanation": "The survey distinguishes preparing high-quality data, accelerating training/inference, and managing deployed models and pipelines. It explicitly treats post-training data/artifact management as part of the problem.",
@@ -120,13 +120,13 @@
     "coverage": "pensum"
   },
   {
-    "id": "in5040-l07-q13",
+    "id": "in5040-l07-q13-v2",
     "question": "When Apriori discovers that itemset {A,B} is below the minimum support threshold, what can it safely infer?",
     "options": [
-      "Every superset containing {A,B} is also below minimum support",
-      "Every subset of {A,B} is below minimum support",
-      "The confidence of A ⇒ B must be 100%",
-      "All other itemsets can be discarded"
+      "Every superset containing {A,B} is also infrequent, since adding items cannot increase support in the data",
+      "Every subset of {A,B} is infrequent, since removing a condition cannot increase the matching basket count",
+      "Every rule with antecedent A has confidence below the threshold, since {A,B} failed minimum support",
+      "Every other two-item combination is infrequent, since one infrequent pair excludes the remaining candidates"
     ],
     "answer": 0,
     "explanation": "Support is anti-monotone under addition of items: a superset cannot occur in more baskets than {A,B}. Pruning supersets is safe, while its subsets can still be frequent.",

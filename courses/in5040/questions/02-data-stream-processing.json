@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l02-q01",
+    "id": "in5040-l02-q01-v2",
     "question": "What makes a continuous query fundamentally different from a one-time DBMS query?",
     "options": [
-      "It can only execute SQL without WHERE",
-      "It is registered to process arriving stream data over time and may maintain evolving results or output streams",
-      "It always sees the complete future stream before producing output",
-      "It must permanently store every record"
+      "It repeatedly queries stored snapshots at scheduled intervals, with a new query registered for each arriving event",
+      "It remains registered as events arrive, maintaining evolving results or emitting new output over time",
+      "It computes over a bounded input file once, then replays the same completed output whenever events are appended",
+      "It uses a durable stored snapshot for each refresh, and the stream is mainly a trigger for the next batch query"
     ],
     "answer": 1,
     "explanation": "Continuous queries keep running as data arrives; one-time queries are evaluated over a fixed data snapshot.",
@@ -15,13 +15,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q02",
+    "id": "in5040-l02-q02-v2",
     "question": "Which operator requires state even when each incoming event is processed individually?",
     "options": [
-      "A map that converts Celsius to Fahrenheit",
-      "A filter that forwards temperature > 30",
-      "A running count of events per weather station",
-      "A field projection of stationName"
+      "A per-event Celsius-to-Fahrenheit conversion that needs only the current temperature value",
+      "A threshold filter that forwards an event only when its measured temperature exceeds 30",
+      "A running event count maintained separately for each weather station across arrivals",
+      "A projection that removes fields other than stationName from each individual event"
     ],
     "answer": 2,
     "explanation": "The count for a station depends on preceding events. A pure map, filter and projection can process records independently.",
@@ -45,13 +45,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q05",
+    "id": "in5040-l02-q05-v2",
     "question": "What distinguishes a tumbling count window of 3 from a sliding count window of 3 with slide 1?",
     "options": [
-      "Tumbling windows can never aggregate data",
-      "A tumbling window groups non-overlapping triples; sliding windows overlap and reuse events in successive windows",
-      "Sliding windows use timestamps while tumbling windows cannot",
-      "Both produce identical membership and output timing"
+      "A tumbling window advances after every arrival; a sliding window waits for its first complete fixed-size batch",
+      "Tumbling windows form disjoint triples; slide-one count windows reuse events in overlapping triples",
+      "Sliding windows use timestamps to close, while tumbling windows only count arriving records",
+      "Both retain the latest three events, but tumbling windows emit results without advancing their membership"
     ],
     "answer": 1,
     "explanation": "With records A,B,C,D, a tumbling window completes [A,B,C], whereas the rolling length-3 window next contains [B,C,D].",
@@ -60,13 +60,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q06",
+    "id": "in5040-l02-q06-v2",
     "question": "A mobile sensor records events at 10:01–10:03 while offline and sends them all at 10:10. Which claim is correct?",
     "options": [
-      "Event time necessarily equals the server arrival time",
-      "Event-time windows use event timestamps; processing-time windows use the operator clock, so assignments can differ",
-      "Both window types always reconstruct the same minutes",
-      "The events cannot be processed because they are late"
+      "Event-time windows assign records to arrival minutes, while processing-time windows reconstruct sensor timestamps",
+      "Event-time uses measurement timestamps; processing-time uses when operators run, so window membership can differ",
+      "Both approaches place delayed readings in their original minutes, provided the application replays all stored data",
+      "Processing-time windows use the device clock, while event-time windows use the receiving server’s local clock"
     ],
     "answer": 1,
     "explanation": "Event time captures when something happened; processing time captures when the engine observes/processes it. Late data policy affects handling.",
@@ -75,13 +75,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q07",
+    "id": "in5040-l02-q07-v2",
     "question": "In event-time stream processing, what is the best interpretation of a watermark with timestamp T?",
     "options": [
-      "A cryptographic proof that no earlier-timestamp event can arrive",
-      "A progress estimate/assumption used to determine when event-time operations may advance",
-      "An instruction to permanently stop every query",
-      "The processing-time clock of the CPU"
+      "A completeness guarantee saying that no older event may legally arrive after the marked event-time threshold",
+      "A progress signal expressing an assumption about event time, allowing event-time computations to advance",
+      "A special timer that periodically discards all operator state regardless of incoming event timestamps",
+      "A measurement of the wall-clock time spent processing the most recently received event in the system"
     ],
     "answer": 1,
     "explanation": "Watermarks signal expected event-time progress. Straggling events can still arrive later, so engines need late-event policies.",
@@ -90,13 +90,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q09",
+    "id": "in5040-l02-q09-v2",
     "question": "When might an approximate synopsis be preferable to an exact stream computation?",
     "options": [
-      "When the query can be answered exactly with zero state",
-      "When bounded memory or input rate prevents exact historical computation and the application can tolerate controlled error",
-      "Whenever the developer dislikes writing SQL",
-      "Only when queries are one-time and never run on streams"
+      "When summaries can be updated exactly from fixed-size state and an application requires zero estimation error",
+      "When exact history is too expensive and the application can accept a measured error for reduced memory or work",
+      "When input is low-rate but operators intentionally defer all outputs until the entire stream has terminated",
+      "When the main goal is to remove late events, since an approximation makes watermarks and event time unnecessary"
     ],
     "answer": 1,
     "explanation": "Sampling, histograms and sketches trade fidelity for resource use. Approximation should reflect the application’s acceptable error, not convenience.",
@@ -105,13 +105,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q10",
+    "id": "in5040-l02-q10-v2",
     "question": "In the hospital stream-join example, why is dropping random events potentially dangerous under overload?",
     "options": [
-      "Dropping records always improves medical accuracy",
-      "All events have identical urgency and utility",
-      "Discarding urgent patients can undermine the critical results even if throughput improves",
-      "The join output is unaffected by filtering before the join"
+      "Random shedding can delay only low-priority reports, provided dropped records are chosen without looking at severity",
+      "Every arriving patient event has the same immediate diagnostic value, so random dropping preserves result quality",
+      "Dropping urgent patient records can remove critical matches even when the join processes its remaining work faster",
+      "Dropping join inputs is harmless if the retained records have valid schemas and a consistent processing timestamp"
     ],
     "answer": 2,
     "explanation": "Load shedding needs application-aware QoS/utility choices; the lecture’s triage filter prioritizes critical patients rather than shedding indiscriminately.",
@@ -120,13 +120,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q11",
+    "id": "in5040-l02-q11-v2",
     "question": "Why do distributed stateful Flink jobs need checkpoints when the live state is already kept in a state backend?",
     "options": [
-      "The backend automatically makes every side effect globally transactional",
-      "A checkpoint provides a recoverable, consistent state and source-position snapshot after failures",
-      "A checkpoint is identical to scaling out a worker",
-      "Checkpointing is needed only for stateless filters"
+      "The state backend and output sink share one checkpoint boundary, so arbitrary external side effects receive state guarantees",
+      "Checkpoints capture consistent recoverable state and source positions for restarting the computation after a failure",
+      "Checkpoints primarily rebalance keyed data after scaling, whereas the state backend itself restores source offsets",
+      "A state backend saves current counters; recovery uses recomputation from source data without a consistent saved offset"
     ],
     "answer": 1,
     "explanation": "Live local state can be lost when tasks fail. Distributed checkpoints and replayable inputs allow restoring a consistent logical computation.",
@@ -135,13 +135,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l02-q12",
+    "id": "in5040-l02-q12-v2",
     "question": "Which statement about at-least-once versus exactly-once is accurate?",
     "options": [
-      "At-least-once means some records are processed zero times",
-      "Exactly-once managed state automatically guarantees an external email is sent once",
-      "At-least-once permits duplicates after replay; exactly-once managed state avoids duplicate logical effects in recovered state under its assumptions",
-      "Exactly-once means a system will never crash"
+      "At-least-once prevents duplicate processing, while exactly-once merely means all events eventually reach the operator",
+      "Successful recovery of managed state also prevents repeated email delivery, since both actions follow the same event log",
+      "At-least-once can replay an event; exactly-once managed state avoids duplicate logical state effects after recovery",
+      "Exactly-once relies on sources suppressing replay after failures, instead of allowing repeated reads with deduplication"
     ],
     "answer": 2,
     "explanation": "Recovery may replay events; consistent snapshots prevent duplicate logical effects on managed state. External sinks require compatible guarantees.",

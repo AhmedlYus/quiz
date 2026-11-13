@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l06-q01",
+    "id": "in5040-l06-q01-v2",
     "topic": "Lecture 6: Web Data Management",
     "options": [
-      "A global transaction log",
-      "An inverted index mapping terms to document postings",
-      "A distributed DBMS wait-for graph",
-      "An XML schema for a crawler’s configuration"
+      "A forward index of each document's tokens, scanned to find occurrences of the term",
+      "An inverted index linking each searched term to postings identifying the documents that contain it",
+      "A hyperlink adjacency list that identifies which pages link to each other, regardless of the text they contain",
+      "An XML schema describing the allowed document elements and attributes but not indexing their textual content"
     ],
     "explanation": "An inverted index associates terms with document identifiers, allowing candidate retrieval without scanning every page. Link-structure indexes instead represent hyperlinks, and transaction logs and wait-for graphs solve unrelated consistency problems.",
     "coverage": "slides",
@@ -15,13 +15,13 @@
     "answer": 1
   },
   {
-    "id": "in5040-l06-q02",
+    "id": "in5040-l06-q02-v2",
     "topic": "Lecture 6: Web Data Management",
     "options": [
-      "Because HTML cannot contain database data",
-      "Because crawlers follow discoverable URLs and may not generate the required form queries or access private interfaces",
-      "Because inverted indexes cannot represent words from dynamic pages",
-      "Because the content necessarily belongs to the dark Web"
+      "A crawler indexing visible pages will eventually infer all possible form parameters if it revisits those pages often enough",
+      "The data are exposed through forms or parameters that URL-following crawlers may not enumerate or submit",
+      "An inverted index retrieves dynamic documents automatically, but the crawler cannot rank their results until they stabilize",
+      "A crawler can infer hidden records from link text because forms expose the data schema"
     ],
     "explanation": "The hidden/deep Web can require submitting form parameters or invoking APIs to reveal results. A crawler following linked pages alone cannot enumerate arbitrary source queries; deep Web does not imply the dark Web or an index-format limitation.",
     "coverage": "slides",
@@ -30,13 +30,13 @@
     "answer": 1
   },
   {
-    "id": "in5040-l06-q04",
+    "id": "in5040-l06-q04-v2",
     "topic": "Lecture 6: Web Data Management",
     "options": [
-      "Shredding XML into relations",
-      "Applying PageRank to XML nodes",
-      "Updating every RDF replica",
-      "Using one-copy serializability to publish XML"
+      "XML shredding: parse documents and map their elements, attributes and identities into relational rows",
+      "XML publishing: assemble documents from existing relational rows to provide a hierarchical export format",
+      "Native XML storage: keep each full document tree as a first-class object and query its hierarchy directly",
+      "XML indexing: build path and value indexes over document nodes without first defining a relational decomposition"
     ],
     "explanation": "XML shredding maps document content and (as necessary) structure into relational tables. XML publishing/composing goes in the opposite direction, generating XML from database contents; a native XML store preserves documents as first-class data.",
     "coverage": "slides",
@@ -45,13 +45,13 @@
     "answer": 0
   },
   {
-    "id": "in5040-l06-q06",
+    "id": "in5040-l06-q06-v2",
     "topic": "Lecture 6: Web Data Management",
     "options": [
-      "RDF facts are subject–predicate–object triples forming a labeled graph, whereas XML naturally stores an ordered element hierarchy",
-      "RDF is necessarily a table with exactly three columns on disk",
-      "XML cannot represent relationships between objects",
-      "RDF subjects must always be plain text literals"
+      "RDF expresses subject–predicate–object graph statements; XML typically represents an ordered element hierarchy",
+      "RDF enforces an ordered nested document tree; XML normally represents independently addressable graph triples",
+      "RDF and XML have identical logical models; the only difference is whether data are stored in relational tables",
+      "XML represents a labeled graph of global resource identities, while RDF requires an ordered root for every dataset"
     ],
     "explanation": "RDF defines a logical graph of triples, independent of one physical storage layout. XML primarily models nested ordered document structure; it may encode references, so claiming that XML can never represent relationships is too strong.",
     "coverage": "slides",
@@ -75,13 +75,13 @@
     "answer": 0
   },
   {
-    "id": "in5040-l06-q08",
+    "id": "in5040-l06-q08-v2",
     "topic": "Lecture 6: Web Data Management",
     "options": [
-      "A subject-centered property table containing those columns",
-      "A single unindexed triple table, guaranteed to outperform every alternative",
-      "A collection of unrelated XML files without an index",
-      "A global wait-for graph reused as an RDF index"
+      "A subject-oriented property table holding commonly queried predicates together, reducing repeated star-pattern joins",
+      "A generic triple table with only a subject index, which eliminates the need to combine multiple predicates",
+      "A path-compressed graph representation tuned to many-hop reachability queries rather than same-subject attributes",
+      "A separate relation for every RDF statement, avoiding duplicate predicates but requiring joins for each attribute"
     ],
     "explanation": "Grouping co-occurring predicates into a property table permits many same-subject values to be retrieved together, often reducing star-query joins. Sparse or multivalued properties can make such tables inefficient, so it is not an unconditional winner.",
     "coverage": "slides",
@@ -93,16 +93,16 @@
     "question": "Given the XML document in the code block, which XPath expression selects the title element of the book whose id is b2?",
     "options": [
       "/catalog/book[@id='b2']/title",
-      "/catalog/title[@id='b2']",
-      "/catalog/book/title[@id='b1']",
-      "//book/@title"
+      "/catalog/book/title[@id='b2']",
+      "/catalog/book[@id='b1']/title",
+      "/catalog/book[@id='b2']/@title"
     ],
     "answer": 0,
     "code": "<catalog>\n  <book id=\"b1\"><title>DBMS</title></book>\n  <book id=\"b2\"><title>Web Data</title></book>\n</catalog>",
     "explanation": "The correct path descends through catalog/book, filters the book element on its id attribute with [@id='b2'], then selects its title child. XPath navigates document hierarchy; @title would refer to an attribute, not the title element.",
     "coverage": "pensum",
     "source": "Özsu & Valduriez (2020), Ch. 12 §12.6.2 (XML path/query languages); Lecture 6 slides 23–26 introduce XML documents.",
-    "id": "in5040-l06-q11",
+    "id": "in5040-l06-q11-v2",
     "topic": "Lecture 6: Web Data Management"
   }
 ]

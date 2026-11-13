@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l01-q01",
+    "id": "in5040-l01-q01-v2",
     "question": "A logistics platform receives high-frequency GPS updates, inventory tables and customer messages. Which combination correctly identifies the Big Data problems?",
     "options": [
-      "Volume concerns arrival order; velocity concerns legal access; variety concerns total row count",
-      "Velocity concerns rapid updates; variety concerns incompatible formats; veracity concerns unreliable readings",
-      "Volume, velocity and variety are all synonyms for storage size",
-      "Veracity means how valuable each database license is"
+      "Velocity describes incompatible formats; variety describes arrival rate; veracity describes record reliability",
+      "Velocity describes rapid updates; variety describes differing formats; veracity describes unreliable measurements",
+      "Volume describes the number of formats; velocity describes total storage; veracity describes processing capacity",
+      "Variety describes record quality; veracity describes source diversity; velocity describes the usefulness of results"
     ],
     "answer": 1,
     "explanation": "The lecture distinguishes speed of arrival, heterogeneity of formats and trustworthiness of records. The first choice mixes up the characteristics.",
@@ -15,13 +15,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l01-q02",
+    "id": "in5040-l01-q02-v2",
     "question": "Why is integrating heterogeneous datasets difficult even after the records are placed in the same storage system?",
     "options": [
-      "All stored records are automatically given the same meaning",
-      "Only network bandwidth determines whether the data is usable",
-      "Sources can disagree on schema, identity, units and semantics, so reconciliation and metadata remain necessary",
-      "Heterogeneity disappears when everything is converted to JSON"
+      "Storing records together resolves data types, but analysts must still reconcile their arrival and update frequencies",
+      "Common storage normalizes field names, but each source must still use the same indexes and query optimizer",
+      "Sources can disagree on schemas, identities, units and meanings; reconciliation and metadata are still required",
+      "Converting formats resolves naming conflicts, but differences in value distributions require only larger indexes"
     ],
     "answer": 2,
     "explanation": "Putting records together does not resolve conflicting definitions or data quality. JSON conversion is a representation change, not semantic integration.",
@@ -30,13 +30,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l01-q03",
+    "id": "in5040-l01-q03-v2",
     "question": "Which example best illustrates the Beckman report’s end-to-end data-to-knowledge challenge?",
     "options": [
-      "Buying more SSDs without checking data semantics",
-      "Cleaning and linking raw sources, recording provenance, then transforming data for analysis and decisions",
-      "Issuing more SQL queries against the same unvalidated source",
-      "Moving an isolated database to a larger server"
+      "Scale the storage cluster, create one common table and make downstream analysts responsible for data interpretation",
+      "Clean and link sources, track provenance, transform the data, then analyze it to support decisions over time",
+      "Run analytical SQL over source data and use a faster optimizer to compensate for missing labels and metadata",
+      "Move the databases into one cloud region, then expose source-specific schemas without reconciling records"
     ],
     "answer": 1,
     "explanation": "The pipeline encompasses ingestion, quality, meaning, transformation and use. Hardware alone cannot make untrusted or incompatible data meaningful.",
@@ -45,13 +45,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l01-q04",
+    "id": "in5040-l01-q04-v2",
     "question": "An OLTP system, an analytical warehouse and a stream processor coexist in a retailer. What is the main reason?",
     "options": [
-      "All three must run exactly the same SQL query simultaneously",
-      "The warehouse replaces the need for transactional consistency",
-      "They address different needs: durable short transactions, historical analytical queries and low-latency continuous event processing",
-      "Stream processing cannot read events originating from databases"
+      "They separate transactional storage and reporting, but fraud alerts can rely on the warehouse’s overnight ETL refresh",
+      "They provide live analytics and historical reporting, so the warehouse can replace the OLTP transaction system",
+      "OLTP handles short durable transactions; warehouses provide historical analytics; streams react to live events",
+      "They split operational writes from reports, while the stream engine primarily executes periodic warehouse batch jobs"
     ],
     "answer": 2,
     "explanation": "The L1 architecture diagrams compare complementary workload patterns; a warehouse does not replace an operational DBMS.",
@@ -60,13 +60,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l01-q07",
+    "id": "in5040-l01-q07-v2",
     "question": "What is the major shift in emphasis from the Beckman report (2016) to Seattle (2022) and Cambridge (2025)?",
     "options": [
-      "Data quality ceased to matter once cloud computing appeared",
-      "Relational algebra was abandoned in favour of only neural networks",
-      "The agenda broadened from Big Data infrastructure and integration to data science, governance, cloud-native systems and AI for data management",
-      "The Cambridge report focused exclusively on stream-processing syntax"
+      "The later reports emphasized cloud scalability but treated data integration and data quality as already solved concerns",
+      "The later reports focused mainly on NoSQL data models, while the role of data science and governance stayed peripheral",
+      "The agenda broadened from Big Data scale and integration toward governance, cloud-native systems and AI for databases",
+      "The later reports focused on query execution and new hardware while leaving responsible AI out of data-management research"
     ],
     "answer": 2,
     "explanation": "The research agendas broaden rather than replace earlier problems. Neither report claims that AI removes the need for data management.",
@@ -75,13 +75,13 @@
     "coverage": "slides"
   },
   {
-    "id": "in5040-l01-q09",
+    "id": "in5040-l01-q09-v2",
     "question": "A company says its analytics must be responsible. Which statement is most defensible?",
     "options": [
-      "Data governance only applies to the final visualization",
-      "An accurate model is automatically fair and legally compliant",
-      "Data collection, cleaning, access controls and provenance influence accuracy, fairness, trust and compliance throughout the pipeline",
-      "Privacy and provenance become irrelevant when using a data lake"
+      "Once access control is configured at collection, data copied into later pipelines no longer needs lineage or auditing",
+      "Model-output evaluation alone can establish responsible use, because source selection and cleaning do not alter fairness",
+      "Collection, cleaning, permissions and provenance influence the trustworthiness and lawful use of the entire pipeline",
+      "A warehouse can enforce privacy on its final reports without retaining information about earlier source transformations"
     ],
     "answer": 2,
     "explanation": "The research reports explicitly connect responsible AI with earlier data-management choices. A correct calculation may still be based on biased or impermissibly used data.",

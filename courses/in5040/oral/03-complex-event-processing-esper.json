@@ -2,7 +2,7 @@
   {
     "id": "oral-in5040-l03-q01",
     "type": "compare",
-    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "topic": "Lecture 3: Complex Event Processing, Esper & Operator Migration",
     "prompt": "Explain CEP versus ordinary continuous filtering. What state and semantics are involved in an Esper followed-by pattern?",
     "keyPoints": [
       "A filter checks one event independently",
@@ -23,7 +23,7 @@
   {
     "id": "oral-in5040-l03-q02",
     "type": "compare",
-    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "topic": "Lecture 3: Complex Event Processing, Esper & Operator Migration",
     "prompt": "Compare Esper EPL windows #length(7), #length_batch(7), #time(7 days) and #ext_timed(timestamp, 7 days). Use the weather-station events from the assignment.",
     "keyPoints": [
       "Length is rolling over last N arrivals",
@@ -44,7 +44,7 @@
   {
     "id": "oral-in5040-l03-q04",
     "type": "walkthrough",
-    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "topic": "Lecture 3: Complex Event Processing, Esper & Operator Migration",
     "prompt": "Walk through the basic all-at-once migration of a stateful operator between two machines. What must be preserved to maintain correct output?",
     "keyPoints": [
       "Stop/pause upstream delivery to the operator",
@@ -65,7 +65,7 @@
   {
     "id": "oral-in5040-l03-q05",
     "type": "compare",
-    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "topic": "Lecture 3: Complex Event Processing, Esper & Operator Migration",
     "prompt": "Compare all-at-once, key-by-key and semantics/utility-aware operator migration in terms of latency, complexity and correctness.",
     "keyPoints": [
       "All-at-once treats complete state as atomic and can cause a long pause",
@@ -86,7 +86,7 @@
   {
     "id": "oral-in5040-l03-ass1-2026-oral05",
     "type": "walkthrough",
-    "topic": "Lecture 3: Complex Event Processing & Esper",
+    "topic": "Lecture 3: Complex Event Processing, Esper & Operator Migration",
     "prompt": "Assignment 1, Question 5: For the event sequence below, enumerate the A/B matches produced by each Esper pattern. Explain the scope of every and why the four results differ.\na) every A -> B\nb) A -> every B\nc) every A -> every B\nd) every (A -> B)",
     "code": "A1 C1 A2 B1 D1 A3 B2 C2 B3 C3 C4 A4 B4\nEvents C and D do not match A or B. Pattern instances may overlap.",
     "keyPoints": [

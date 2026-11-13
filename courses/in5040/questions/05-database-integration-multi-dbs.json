@@ -1,12 +1,12 @@
 [
   {
-    "id": "in5040-l05-q01",
+    "id": "in5040-l05-q01-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "Materialized ETL warehouse; no source calls during refresh",
-      "Logical integration using a mediated GCS; runtime dependency on source access and query translation",
-      "Full replication at every site; no synchronization needed",
-      "XML export alone; semantic mappings become unnecessary"
+      "A materialized warehouse with incremental ETL; the main cost is coordinating continuous copies and refresh cycles",
+      "Logical federation with a mediated schema; queries depend on live sources and translation through wrappers",
+      "Full multi-site replication; queries remain independent of source systems once copies synchronize",
+      "A common XML interchange format; queries still require only a global document schema, not source-specific mappings"
     ],
     "explanation": "Logical integration exposes a virtual GCS and obtains data from source DBMSs when queries run. It avoids copying everything but depends on remote latency, source availability, mappings, and wrapper capabilities. A warehouse instead materializes integrated records and usually has refresh lag.",
     "coverage": "slides",
@@ -15,13 +15,13 @@
     "answer": 1
   },
   {
-    "id": "in5040-l05-q02",
+    "id": "in5040-l05-q02-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "The local database’s unrelated client application",
-      "The fragmentation catalogue of a single homogeneous distributed DBMS",
-      "A wrapper, translating queries, export-schema names and result types",
-      "A 2PC coordinator, which changes SQL syntax automatically"
+      "The mediator, because it writes each DBMS-specific query dialect directly into the local transaction log",
+      "The global catalogue, which uses export schemas to rewrite source syntax without a source-specific translator",
+      "A source wrapper, which translates supported subqueries and normalizes exported names and data representations",
+      "The atomic-commit coordinator, which converts source syntax and identifier values as part of the prepare phase"
     ],
     "explanation": "Wrappers expose source capabilities, translate mediated operations into local interfaces, and normalize returned results. The mediator makes global planning decisions; the commit coordinator does not translate schemas or query syntax.",
     "coverage": "slides",
@@ -30,13 +30,13 @@
     "answer": 2
   },
   {
-    "id": "in5040-l05-q03",
+    "id": "in5040-l05-q03-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "Assume the two IDs identify one entity because the number matches",
-      "Run schema matching, then verify identifier semantics and define explicit normalization/entity mappings",
-      "Use 2PC to determine whether two IDs refer to the same customer",
-      "Copy both tables into one warehouse; this automatically resolves duplicate identities"
+      "Normalize both values to integer 12 and merge, since equal numbers identify the same real-world entity",
+      "Match the schemas, verify identifier namespaces and semantics, then establish explicit entity and value mappings",
+      "Issue a coordinated transaction across both sources, since a successful commit confirms that the IDs are equivalent",
+      "Materialize both sources in a warehouse, where identical displayed values can be treated as stable primary keys"
     ],
     "explanation": "Matching identifies a possible correspondence, but the same displayed ID need not denote the same real-world entity. Domain semantics, namespace, key uniqueness and entity-resolution rules must be checked; schema mapping then specifies valid transformations. Neither 2PC nor physical copying establishes identity.",
     "coverage": "slides",
@@ -45,13 +45,13 @@
     "answer": 1
   },
   {
-    "id": "in5040-l05-q04",
+    "id": "in5040-l05-q04-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "LAV, because every local source is defined in terms of GCS",
-      "2PL, because the definition spans two DBMSs",
-      "GAV, because a global relation is defined as a view over local source relations",
-      "A data lake schema-on-read rule"
+      "LAV, since each local table is defined in terms of a separate global relation and all local schemas remain unchanged",
+      "GLAV, since defining the global view necessarily introduces existentially quantified relations on both sides",
+      "GAV, since the global Customer relation is defined as a view over the available local source relations",
+      "A source-as-view mapping, since the local CRM and ERP relations are views of the already defined global Customer"
     ],
     "explanation": "In global-as-view (GAV), global schema elements are defined through queries over local sources, so global queries can often be unfolded. LAV reverses the definition direction by describing local sources as views over an independently defined global schema.",
     "coverage": "slides",
@@ -60,13 +60,13 @@
     "answer": 2
   },
   {
-    "id": "in5040-l05-q05",
+    "id": "in5040-l05-q05-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "The system can infer every missing city from the GCS declaration",
-      "Global query rewriting may use available views, but cannot guarantee complete results without a source covering every requested customer",
-      "LAV always materializes one global warehouse",
-      "Every source must use the same physical DBMS for LAV to function"
+      "The global schema guarantees a complete answer, since its broader definition implies that missing local tuples exist",
+      "View-based rewriting can use Oslo and Bergen sources but cannot recover uncovered customers from an absent view",
+      "The mediator can return every country after materializing the Oslo and Bergen views into a common local relation",
+      "LAV resolves incomplete coverage by querying the source definitions instead of running a global query rewrite"
     ],
     "explanation": "LAV mappings describe what each local source contributes relative to the GCS. A schema definition does not create missing tuples, so a rewriting limited to Oslo and Bergen views cannot guarantee all Norwegian customers are returned.",
     "coverage": "slides",
@@ -75,13 +75,13 @@
     "answer": 1
   },
   {
-    "id": "in5040-l05-q07",
+    "id": "in5040-l05-q07-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "Fetch all CRM rows first and filter at the mediator",
-      "Push city = \"Oslo\" to CRM, project needed columns and ship only matching rows for the cross-source join",
-      "Convert both systems to RDF to avoid all joins",
-      "Ignore the source-side filter because query localization is only a homogeneous-DBMS concern"
+      "Fetch the entire CRM relation and evaluate city = Oslo at the mediator, so the local DBMS needs no statistics",
+      "Push the selective filter and projection into CRM, then transfer the small result for the cross-source join",
+      "Replicate all Invoice records into CRM before filtering; data transfer is unchanged but local joins become possible",
+      "First convert CRM and invoices to the same data model, then transfer all rows to avoid source query translation"
     ],
     "explanation": "Source-side selection and projection can reduce transferred CRM rows from one million to about 100 and limit intermediate volume. This is a cost optimization, not a guarantee of global optimality if source indexes, latency or join selectivity differ.",
     "coverage": "slides",
@@ -90,13 +90,13 @@
     "answer": 1
   },
   {
-    "id": "in5040-l05-q09",
+    "id": "in5040-l05-q09-v2",
     "topic": "Lecture 5: Database Integration & Multi-DBS",
     "options": [
-      "The shared GCS automatically guarantees atomic updates across both sources",
-      "Globally atomic updates cannot be assumed; source autonomy and incompatible transaction APIs limit coordinated commit",
-      "Query unfolding is enough to implement distributed ACID without local support",
-      "Every read-only federated query must be aborted"
+      "The global schema alone makes a coordinated atomic write possible, because it describes both local data models",
+      "Global atomic updates cannot be assumed when autonomous sources lack compatible prepare and commit operations",
+      "A mediator can obtain ACID behavior for any updates by unfolding the write query into separate local statements",
+      "Cross-source reads become impossible whenever one source refuses the protocol for cross-source updates"
     ],
     "explanation": "A mediated schema and wrapper are not substitutes for participation in a global transaction protocol. Without appropriate coordination support, the federation cannot safely promise atomic all-or-nothing writes across autonomous sources, though read federation can still be useful.",
     "coverage": "slides",
